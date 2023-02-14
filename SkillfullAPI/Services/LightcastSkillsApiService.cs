@@ -30,7 +30,7 @@ namespace SkillfullAPI.Services
             }
         }
 
-        public async Task<SkillDetailsModel> GetSkillDetailsByIdAsync(string Id)
+        public async Task<SkillDetailsModelData> GetSkillDetailsByIdAsync(string Id)
         {
             string response = await GetSkillDetailsResponseByIdAsync(Id);
             if (!string.IsNullOrEmpty(response))
@@ -43,6 +43,8 @@ namespace SkillfullAPI.Services
             }
         }
 
+
+        //THINK OF HOW TO MAKE IT MORE DRY
         private async Task<string> GetAllSkillsResponseAsync()
         {
             var token = await _lightcastAccessTokenService.GetLightcastTokenAsync();
@@ -77,15 +79,15 @@ namespace SkillfullAPI.Services
             }
         }
 
-        private async Task<SkillDetailsModel> DeserializeSkillDetailsResponse(string skillDetailsResponse)
+        private async Task<SkillDetailsModelData> DeserializeSkillDetailsResponse(string skillDetailsResponse)
         {
             if (!string.IsNullOrEmpty(skillDetailsResponse))
             {
-                SkillDetailsModel result;
+                SkillDetailsModelData result;
 
                 try
                 {
-                    result = JsonConvert.DeserializeObject<SkillDetailsModel>(skillDetailsResponse);
+                    result = JsonConvert.DeserializeObject<SkillDetailsModelData>(skillDetailsResponse);
 
                 }
                 catch (Exception ex)

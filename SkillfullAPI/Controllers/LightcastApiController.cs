@@ -30,5 +30,17 @@ namespace SkillfullAPI.Controllers
             }
             return result;
         }
+
+        [HttpGet]
+        [Route("getSkillDetailsById")]
+        public async Task<SkillDetailsModelData> GetSkillDetailsById(string Id)
+        {
+            SkillDetailsModelData result = await _skillsApiService.GetSkillDetailsByIdAsync(Id);
+            if(result == null)
+            {
+                return null;
+            }
+            return result;
+        }
     }
 }

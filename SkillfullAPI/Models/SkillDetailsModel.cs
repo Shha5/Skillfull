@@ -11,4 +11,9 @@
         public SkillCategoryModel subcategory { get; set; }
         public SkillTypeModel type { get; set; }
     }
+   
+    public class SkillDetailsModelData
+    {
+        public SkillDetailsModel data { get; set; }
+    }
 }
