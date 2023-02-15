@@ -6,13 +6,13 @@ using SkillfullAPI.Services.Interfaces;
 namespace SkillfullAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class LightcastApiController : ControllerBase
+    [Route("api/[controller]")]
+    public class SkillsApiController : ControllerBase
     {
-        private readonly ILogger<LightcastApiController> _logger;
+        private readonly ILogger<SkillsApiController> _logger;
         private readonly ILightcastSkillsApiService _skillsApiService;
 
-        public LightcastApiController(ILogger<LightcastApiController> logger, ILightcastSkillsApiService skillsApiService)
+        public SkillsApiController(ILogger<SkillsApiController> logger, ILightcastSkillsApiService skillsApiService)
         {
             _logger = logger;
             _skillsApiService = skillsApiService;
