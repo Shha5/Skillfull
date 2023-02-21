@@ -7,6 +7,7 @@ using SkillfullAPI.Services.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Web;
 
 namespace SkillfullAPI.Controllers
 {
@@ -15,24 +16,22 @@ namespace SkillfullAPI.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly IConfiguration _configuration;
         private readonly ISendGridEmailService _sendGridEmailService;
+        private readonly IJwtTokenGenerationService _jwtTokenGenerationService;
 
-        public AuthController(UserManager<IdentityUser> userManager, IConfiguration configuration, ISendGridEmailService sendGridEmailService)
+        public AuthController(UserManager<IdentityUser> userManager, ISendGridEmailService sendGridEmailService, IJwtTokenGenerationService jwtTokenGenerationService)
         {
             _userManager = userManager;
-            _configuration = configuration;
             _sendGridEmailService = sendGridEmailService;
+            _jwtTokenGenerationService = jwtTokenGenerationService;
         }
 
         [HttpPost]
         [Route("Register")]
         public async Task<IActionResult> Register([FromBody] UserRegistrationRequestDto registerRequestDto)
         {
-            //Validate incoming request
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                //check if email exists
                 var userExists = await _userManager.FindByEmailAsync(registerRequestDto.Email);
                 if (userExists != null)
                 {
@@ -45,40 +44,35 @@ namespace SkillfullAPI.Controllers
                         }
                     });
                 }
+                var newUser = new IdentityUser()
+                {
+                    Email = registerRequestDto.Email,
+                    UserName = registerRequestDto.Name,
+                    EmailConfirmed = false
+                };
+                var isCreated = await _userManager.CreateAsync(newUser, registerRequestDto.Password);
+                if (isCreated.Succeeded)
+                {
+                    var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+                    var callbackUrl = Url.Action("ConfirmEmail", "Auth", new { userId = newUser.Id, emailConfirmationToken = emailConfirmationToken }, protocol: HttpContext.Request.Scheme); //change to redirect to mvc app view 
+                    string subject = "Email verification for Skillfull";
+                    string message = "You can verify your email by clicking this" + "<a href=\"" + callbackUrl + "\"> link</a>";
+                    await _sendGridEmailService.SendEmailAsync(newUser.Email, subject, message);
+                    return Ok(new AuthResultModel()
+                    {
+                        Result = true
+                    });
+                }
                 else
                 {
-                    //create new user
-
-                    var newUser = new IdentityUser()
+                    return BadRequest(new AuthResultModel()
                     {
-                        Email = registerRequestDto.Email,
-                        UserName = registerRequestDto.Name,
-                        EmailConfirmed = false
-                    };
-
-                    var isCreated = await _userManager.CreateAsync(newUser, registerRequestDto.Password);
-
-                    if(isCreated.Succeeded)
-                    {
-                        var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-                        var callbackUrl = Url.Action("ConfirmEmail", "Auth", new { userId = newUser.Id, emailConfirmationToken = emailConfirmationToken }, protocol: HttpContext.Request.Scheme); //change to redirect to mvc app view 
-                        string subject = "Email verification for Skillfull";
-                        string message = "You can verify your email by clicking this" + "<a href=\"" + callbackUrl + "\"> link</a>";
-
-                        await _sendGridEmailService.SendEmailAsync(newUser.Email, subject, message);
-                    }
-                    else
-                    {
-                        return BadRequest(new AuthResultModel()
+                        Result = false,
+                        Errors = new List<string>()
                         {
-                            Result = false,
-                            Errors = new List<string>()
-                            {
-                                "Server error"
-                            }
-                        });
-                    }
-
+                            "Server error"
+                        }
+                    });
                 }
             }
             return BadRequest();
@@ -88,7 +82,7 @@ namespace SkillfullAPI.Controllers
         [Route("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string userId, string emailConfirmationToken)
         {
-            if(string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(emailConfirmationToken))
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(emailConfirmationToken))
             {
                 return BadRequest(new AuthResultModel()
                 {
@@ -99,7 +93,6 @@ namespace SkillfullAPI.Controllers
                     }
                 });
             }
-
             var user = await _userManager.FindByIdAsync(userId);
             var result = await _userManager.ConfirmEmailAsync(user, emailConfirmationToken);
             if (result.Succeeded)
@@ -116,7 +109,7 @@ namespace SkillfullAPI.Controllers
         [Route("ResendEmailConfirmation")]
         public async Task<IActionResult> ResendEmailConfirmation(string email, string password)
         {
-            if(string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
                 return BadRequest(new AuthResultModel()
                 {
@@ -127,9 +120,8 @@ namespace SkillfullAPI.Controllers
                     }
                 });
             }
-
             var user = await _userManager.FindByEmailAsync(email);
-            if(user == null)
+            if (user == null)
             {
                 return BadRequest(new AuthResultModel()
                 {
@@ -140,9 +132,8 @@ namespace SkillfullAPI.Controllers
                     }
                 });
             }
-
             var passwordCorrect = await _userManager.CheckPasswordAsync(user, password);
-            if(passwordCorrect == false)
+            if (passwordCorrect == false)
             {
                 return BadRequest(new AuthResultModel()
                 {
@@ -153,8 +144,7 @@ namespace SkillfullAPI.Controllers
                     }
                 });
             }
-
-            if(user.EmailConfirmed == true)
+            if (user.EmailConfirmed == true)
             {
                 return BadRequest(new AuthResultModel()
                 {
@@ -165,7 +155,6 @@ namespace SkillfullAPI.Controllers
                     }
                 });
             }
-
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, emailConfirmationToken = emailConfirmationToken }, protocol: HttpContext.Request.Scheme); //change to redirect to mvc app view 
             string subject = "Email verification for Skillfull";
@@ -173,19 +162,16 @@ namespace SkillfullAPI.Controllers
 
             await _sendGridEmailService.SendEmailAsync(user.Email, subject, message);
             return Ok();
-
         }
 
         [HttpPost]
         [Route("Login")]
-
         public async Task<IActionResult> Login([FromBody] UserLoginRequestDto loginRequest)
         {
             if (ModelState.IsValid)
             {
-                //check if user exists
                 var user = await _userManager.FindByEmailAsync(loginRequest.Email);
-                if(user == null)
+                if (user == null)
                 {
                     return BadRequest(new AuthResultModel()
                     {
@@ -196,9 +182,8 @@ namespace SkillfullAPI.Controllers
                         }
                     });
                 }
-
                 var isCorrect = await _userManager.CheckPasswordAsync(user, loginRequest.Password);
-                if(isCorrect == false)
+                if (isCorrect == false)
                 {
                     BadRequest(new AuthResultModel()
                     {
@@ -209,7 +194,7 @@ namespace SkillfullAPI.Controllers
                         }
                     });
                 }
-                var jwtToken = GenerateJwtToken(user);
+                var jwtToken = _jwtTokenGenerationService.GenerateJwtToken(user);
                 return Ok(new AuthResultModel()
                 {
                     Result = true,
@@ -226,50 +211,77 @@ namespace SkillfullAPI.Controllers
             });
         }
 
-
-
-     private string GenerateJwtToken(IdentityUser user)
+        [HttpGet]
+        [Route("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword(string email)
         {
-            var jwtTokenHandler= new JwtSecurityTokenHandler();
-
-            var key = Encoding.UTF8.GetBytes(_configuration.GetSection("JwtConfig:Secret").Value);
-
-            //token descriptor
-
-            var tokenDescriptor = new SecurityTokenDescriptor()
+            if (string.IsNullOrEmpty(email))
             {
-                Subject = new ClaimsIdentity(new[] {
-                    new Claim("Id", user.Id),
-                    new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                    new Claim(JwtRegisteredClaimNames.Email, value: user.Email),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToUniversalTime().ToString())
-                }),
+                return BadRequest(new AuthResultModel()
+                {
+                    Result = false,
+                    Errors = new List<string>()
+                    {
+                        "Invalid request"
+                    }
+                });
+            }
 
-                Expires = DateTime.Now.AddHours(1),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
-            };
+            var user = await _userManager.FindByNameAsync(email);
+            if (user == null)
+            {
+                return BadRequest(new AuthResultModel() { Result = false, Errors = new List<string>() { "Invalid request" } });
+            }
+            else
+            {
+                var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var callbackUrl = Url.Action("ResetPassword", "Auth", new { userId = user.Id, passwordResetToken = passwordResetToken }, protocol: HttpContext.Request.Scheme); //change to redirect to mvc app view 
+                string subject = "Password reset for your Skillfull account";
+                string message = "You can reset your password by clicking this" + "<a href=\"" + callbackUrl + "\"> link</a>";
 
-            var token = jwtTokenHandler.CreateToken(tokenDescriptor);
-            var jwtToken = jwtTokenHandler.WriteToken(token);
-
-            return jwtToken;
+                await _sendGridEmailService.SendEmailAsync(user.Email, subject, message);
+                return Ok();
+            }
         }
+
 
         [HttpPost]
-        [Route("SendGridTest")]
-        public async Task<IActionResult> SendEmailTest(string recipentEmail)
+        [Route("ResetPassword")]
+        public async Task<IActionResult> ResetPassword(string userId, string passwordResetToken, string newPassword)
         {
-            string message = "Test message";
-            string subject = "Test message subject";
-
-            await _sendGridEmailService.SendEmailAsync(recipentEmail, subject, message);
-
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(passwordResetToken) || string.IsNullOrEmpty(newPassword))
+            {
+                return BadRequest(new AuthResultModel()
+                {
+                    Result = false,
+                    Errors = new List<string>() { "Invalid request" }
+                });
+            }
+            var user = await _userManager.FindByIdAsync(userId);
+            if(user == null)
+            {
+                return BadRequest(new AuthResultModel()
+                {
+                    Result = false,
+                    Errors = new List<string>()
+                    {
+                        "Invalid request"
+                    }
+                });
+            }
+            var isReset = await _userManager.ResetPasswordAsync(user, passwordResetToken, newPassword);
+            if (!isReset.Succeeded)
+            {
+                return BadRequest(new AuthResultModel()
+                {
+                    Result = false,
+                    Errors = new List<string>()
+                    {
+                        "Failed to confirm email"
+                    }
+                });
+            }
             return Ok();
         }
-
-
-
-
     }
 }

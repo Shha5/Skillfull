@@ -7,12 +7,12 @@ namespace SkillfullAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class SkillsApiController : ControllerBase
+    public class SkillsController : ControllerBase
     {
-        private readonly ILogger<SkillsApiController> _logger;
+        private readonly ILogger<SkillsController> _logger;
         private readonly ILightcastSkillsApiService _skillsApiService;
 
-        public SkillsApiController(ILogger<SkillsApiController> logger, ILightcastSkillsApiService skillsApiService)
+        public SkillsController(ILogger<SkillsController> logger, ILightcastSkillsApiService skillsApiService)
         {
             _logger = logger;
             _skillsApiService = skillsApiService;

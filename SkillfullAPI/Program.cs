@@ -43,6 +43,7 @@ client.BaseAddress = new Uri("https://auth.emsicloud.com/connect/token"));
 builder.Services.AddHttpClient<ILightcastSkillsApiService, LightcastSkillsApiService>(client =>
 client.BaseAddress = new Uri("https://emsiservices.com/skills/versions/latest/"));
 builder.Services.AddTransient<ISendGridEmailService, SendGridEmailService>();
+builder.Services.AddSingleton<IJwtTokenGenerationService, JwtTokenGenerationService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

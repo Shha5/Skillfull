@@ -10,13 +10,13 @@ namespace SkillfullAPI.Services
     {
         private readonly HttpClient _authClient;
         private readonly IConfiguration _configuration;
-        //private readonly ILogger _logger;
+        private readonly ILogger<LightcastAccessTokenService> _logger;
 
-        public LightcastAccessTokenService(HttpClient authClient, IConfiguration configuration/*,*//* ILogger logger*/)
+        public LightcastAccessTokenService(HttpClient authClient, IConfiguration configuration, ILogger<LightcastAccessTokenService> logger)
         {
             _authClient = authClient;
             _configuration = configuration;
-            //_logger = logger;
+            _logger = logger;
         }
 
         public async Task<LightcastAuthTokenModel> GetLightcastTokenAsync()
@@ -61,13 +61,13 @@ namespace SkillfullAPI.Services
                 }
                 else
                 {
-                    //_logger.LogInformation(nameof(LightcastAccessTokenService), $"Request to auth.emsicloud.com/connect/token returned {response.StatusCode}");
+                    _logger.LogInformation(nameof(LightcastAccessTokenService), $"Request to auth.emsicloud.com/connect/token returned {response.StatusCode}");
                     return null;
                 }
             }
             else
             {
-                //_logger.LogInformation(nameof(LightcastAccessTokenService), $"Couldn't retrieve access information from secrets.json");
+                _logger.LogInformation(nameof(LightcastAccessTokenService), $"Couldn't retrieve access information from secrets.json");
                 return null;
             }
         }
@@ -83,14 +83,14 @@ namespace SkillfullAPI.Services
                 }
                 catch (Exception ex)
                 {
-                    //_logger.LogInformation(nameof(LightcastAccessTokenService), $"Deserialization failed. {ex.Message}");
+                    _logger.LogInformation(nameof(LightcastAccessTokenService), $"Deserialization failed. {ex.Message}");
                     return null;
                 }
                 return token;
             }
             else
             {
-                //_logger.LogInformation(nameof(LightcastAccessTokenService), $"Failed to receive information from auth/emsicloud");
+                _logger.LogInformation(nameof(LightcastAccessTokenService), $"Failed to receive information from auth/emsicloud");
                 return null;
             }
         }

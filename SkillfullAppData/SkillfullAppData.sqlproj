@@ -3,16 +3,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <Name>SkillfullData</Name>
+    <Name>SkillfullAppData</Name>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
-    <ProjectGuid>{ce383ddb-a75a-483d-bd49-75dedb166c57}</ProjectGuid>
+    <ProjectGuid>{f485607c-0f32-49d9-a05b-399f0cf438a9}</ProjectGuid>
     <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
-    <RootNamespace>SkillfullData</RootNamespace>
-    <AssemblyName>SkillfullData</AssemblyName>
+    <RootNamespace>SkillfullAppData</RootNamespace>
+    <AssemblyName>SkillfullAppData</AssemblyName>
     <ModelCollation>1033, CI</ModelCollation>
     <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
     <DeployToDatabase>True</DeployToDatabase>
@@ -58,8 +58,20 @@
     <Folder Include="Properties" />
     <Folder Include="Tables" />
     <Folder Include="StoredProcedures" />
+    <Folder Include="PublishLocations" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="SkillfullData.publish.xml" />
+    <Build Include="Tables\UserSkills.sql" />
+    <Build Include="Tables\SkillAssessments.sql" />
+    <Build Include="Tables\UserSkillTasks.sql" />
+    <Build Include="Tables\TaskStatus.sql" />
+    <Build Include="StoredProcedures\sp_GetAllForId_UserSkills.sql" />
+    <Build Include="StoredProcedures\sp_Add_UserSkills.sql" />
+    <Build Include="StoredProcedures\sp_Update_UserSkills.sql" />
+    <Build Include="StoredProcedures\sp_Add_UserSkillTasks.sql" />
+    <Build Include="StoredProcedures\sp_Update_UserSkillTasks.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PublishLocations\SkillfullAppData.publish.xml" />
   </ItemGroup>
 </Project>
