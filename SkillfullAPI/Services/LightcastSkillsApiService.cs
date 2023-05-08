@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using SkillfullAPI.Models;
+using SkillfullAPI.Models.LightcastApiModels;
 using SkillfullAPI.Services.Interfaces;
 using System.Net.Http.Headers;
 
@@ -10,11 +10,13 @@ namespace SkillfullAPI.Services
     {
         private readonly HttpClient _apiClient;
         private readonly ILightcastAccessTokenService _lightcastAccessTokenService;
+        private readonly ILogger<LightcastSkillsApiService> _logger;
 
-        public LightcastSkillsApiService(HttpClient apiClient, ILightcastAccessTokenService lightcastAccessTokenService)
+        public LightcastSkillsApiService(HttpClient apiClient, ILightcastAccessTokenService lightcastAccessTokenService, ILogger<LightcastSkillsApiService> logger)
         {
             _apiClient = apiClient;
             _lightcastAccessTokenService = lightcastAccessTokenService;
+            _logger = logger;
         }
 
         public async Task<SkillModelData> GetAllSkillsAsync()
@@ -57,7 +59,7 @@ namespace SkillfullAPI.Services
             }
             else
             {
-                //_logger.LogInformation(nameof(LightcastAccessTokenService), $"Request to auth.emsicloud.com/connect/token returned {response.StatusCode}");
+                _logger.LogInformation(nameof(LightcastAccessTokenService), $"Request to auth.emsicloud.com/connect/token returned {response.StatusCode}");
                 return null;
             }
         }
@@ -74,7 +76,7 @@ namespace SkillfullAPI.Services
             }
             else
             {
-                //_logger.LogInformation(nameof(LightcastAccessTokenService), $"Request to auth.emsicloud.com/connect/token returned {response.StatusCode}");
+                _logger.LogInformation(nameof(LightcastAccessTokenService), $"Request to auth.emsicloud.com/connect/token returned {response.StatusCode}");
                 return null;
             }
         }
@@ -92,14 +94,14 @@ namespace SkillfullAPI.Services
                 }
                 catch (Exception ex)
                 {
-                    //_logger.LogInformation(nameof(LightcastAccessTokenService), $"Deserialization failed. {ex.Message}");
+                    _logger.LogInformation(nameof(LightcastAccessTokenService), $"Deserialization failed. {ex.Message}");
                     return null;
                 }
                 return result;
             }
             else
             {
-                //_logger.LogInformation(nameof(LightcastAccessTokenService), $"Failed to receive information from auth/emsicloud");
+                _logger.LogInformation(nameof(LightcastAccessTokenService), $"Failed to receive information from auth/emsicloud");
                 return null;
             }
         }
@@ -117,14 +119,14 @@ namespace SkillfullAPI.Services
                 }
                 catch (Exception ex)
                 {
-                    //_logger.LogInformation(nameof(LightcastAccessTokenService), $"Deserialization failed. {ex.Message}");
+                    _logger.LogInformation(nameof(LightcastAccessTokenService), $"Deserialization failed. {ex.Message}");
                     return null;
                 }
                 return result;
             }
             else
             {
-                //_logger.LogInformation(nameof(LightcastAccessTokenService), $"Failed to receive information from auth/emsicloud");
+                _logger.LogInformation(nameof(LightcastAccessTokenService), $"Failed to receive information from auth/emsicloud");
                 return null;
             }
         }

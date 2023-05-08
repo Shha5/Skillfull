@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using SkillfullAPI.Models;
+using SkillfullAPI.Models.LightcastApiModels;
 using SkillfullAPI.Services.Interfaces;
 using System;
 using System.Text;

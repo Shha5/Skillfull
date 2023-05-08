@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.IdentityModel.Tokens;
+using SkillfullAPI.Data;
 using SkillfullAPI.Models;
+using SkillfullAPI.Models.AuthorizationModels;
 using SkillfullAPI.Models.DTOs;
 using SkillfullAPI.Services.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
@@ -18,12 +21,16 @@ namespace SkillfullAPI.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ISendGridEmailService _sendGridEmailService;
         private readonly IJwtTokenGenerationService _jwtTokenGenerationService;
+        
 
-        public AuthController(UserManager<IdentityUser> userManager, ISendGridEmailService sendGridEmailService, IJwtTokenGenerationService jwtTokenGenerationService)
+        public AuthController(UserManager<IdentityUser> userManager, 
+            ISendGridEmailService sendGridEmailService, 
+            IJwtTokenGenerationService jwtTokenGenerationService)
         {
             _userManager = userManager;
             _sendGridEmailService = sendGridEmailService;
             _jwtTokenGenerationService = jwtTokenGenerationService;
+            
         }
 
         [HttpPost]
@@ -194,12 +201,8 @@ namespace SkillfullAPI.Controllers
                         }
                     });
                 }
-                var jwtToken = _jwtTokenGenerationService.GenerateJwtToken(user);
-                return Ok(new AuthResultModel()
-                {
-                    Result = true,
-                    Token = jwtToken
-                });
+                var jwtToken = await _jwtTokenGenerationService.GenerateJwtToken(user);
+                return Ok(jwtToken);
             }
             return BadRequest(new AuthResultModel()
             {
@@ -283,5 +286,39 @@ namespace SkillfullAPI.Controllers
             }
             return Ok();
         }
+
+        [HttpPost]
+        [Route("RefreshToken")]
+        public async Task<IActionResult> RefreshToken([FromBody] TokenRequestDto tokenRequest)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _jwtTokenGenerationService.VerifyAndGenerateToken(tokenRequest);
+
+                if(result == null)
+                {
+                    return BadRequest(new AuthResultModel()
+                    {
+                        Result = false,
+                        Errors = new List<string>()
+                        {
+                            "Verification failed"
+                        }
+                    });
+                }
+
+                return Ok(result);
+            }
+
+            return BadRequest(new AuthResultModel()
+            {
+                Result = false,
+                Errors = new List<string>()
+                {
+                    "Invalid parameters"
+                }
+            });
+        }
     }
 }
+

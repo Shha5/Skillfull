@@ -16,4 +16,6 @@ SET NOCOUNT ON
 	JOIN [TaskStatus]
 	ON [UserSkillTasks].[Status] = [TaskStatus].[Id]
 
+	WHERE [UserSkills].UserId = @userId
+
 END

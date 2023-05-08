@@ -9,11 +9,11 @@ namespace DataAccessLibrary.Models
 {
     public class UserSkillTaskDataModel
     {
-        public int Id { get; set; }
+        public int? Id { get; set; } = null;
         public string Name { get; set; }
         public string Description { get; set; }
-        public DateTime Created { get; set; }
-        public DateTime Modified { get; set; }
+        public DateTime? Created { get; set; } = null;
+        public DateTime? Modified { get; set; } = null;
         public TaskStatusDataModel Status { get; set; }
     }
 }

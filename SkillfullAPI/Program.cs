@@ -16,6 +16,19 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
+var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JwtConfig:Secret").Value);
+var tokenValidationParameters = new TokenValidationParameters()
+{
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey = new SymmetricSecurityKey(key),
+    ValidateIssuer = false, //for dev
+    ValidateAudience = false, //for dev
+    RequireExpirationTime = false, //to be updated after adding refresh token
+    ValidateLifetime = true
+};
+
+builder.Services.AddSingleton(tokenValidationParameters);
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -24,17 +37,9 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(jwt =>
     {
-        var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JwtConfig:Secret").Value);
+        
         jwt.SaveToken = true;
-        jwt.TokenValidationParameters = new TokenValidationParameters()
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = false, //for dev
-            ValidateAudience = false, //for dev
-            RequireExpirationTime = false, //to be updated after adding refresh token
-            ValidateLifetime = true
-        };
+        jwt.TokenValidationParameters = tokenValidationParameters;
     });
 
 
@@ -43,7 +48,7 @@ client.BaseAddress = new Uri("https://auth.emsicloud.com/connect/token"));
 builder.Services.AddHttpClient<ILightcastSkillsApiService, LightcastSkillsApiService>(client =>
 client.BaseAddress = new Uri("https://emsiservices.com/skills/versions/latest/"));
 builder.Services.AddTransient<ISendGridEmailService, SendGridEmailService>();
-builder.Services.AddSingleton<IJwtTokenGenerationService, JwtTokenGenerationService>();
+builder.Services.AddScoped<IJwtTokenGenerationService, JwtTokenGenerationService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

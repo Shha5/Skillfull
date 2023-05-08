@@ -1,4 +1,4 @@
-﻿using SkillfullAPI.Models;
+﻿using SkillfullAPI.Models.LightcastApiModels;
 
 namespace SkillfullAPI.Services.Interfaces
 {

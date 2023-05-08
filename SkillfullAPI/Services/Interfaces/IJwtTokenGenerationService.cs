@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using SkillfullAPI.Models.AuthorizationModels;
 
 namespace SkillfullAPI.Services.Interfaces
 {
     public interface IJwtTokenGenerationService
     {
-        string GenerateJwtToken(IdentityUser user);
+        Task<AuthResultModel> GenerateJwtToken(IdentityUser user);
+        Task<AuthResultModel> VerifyAndGenerateToken(TokenRequestDto tokenRequest);
     }
 }

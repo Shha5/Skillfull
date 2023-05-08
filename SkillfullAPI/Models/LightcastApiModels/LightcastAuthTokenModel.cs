@@ -1,4 +1,4 @@
-﻿namespace SkillfullAPI.Models
+﻿namespace SkillfullAPI.Models.LightcastApiModels
 {
     public class LightcastAuthTokenModel
     {
