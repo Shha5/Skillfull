@@ -1,8 +1,13 @@
-﻿namespace SkillfullAPI.Models.LightcastApiModels
+﻿using Newtonsoft.Json;
+
+namespace SkillfullAPI.Models.LightcastApiModels
 {
     public class LightcastAuthTokenModel
     {
-        public string access_token { get; set; }
-        public string token_type { get; set; }
+        [JsonProperty("access_token")]
+        public string AccessToken { get; set; }
+
+        [JsonProperty("token_type")]
+        public string TokenType { get; set; }
     }
 }

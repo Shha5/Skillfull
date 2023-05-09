@@ -1,12 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SkillfullAPI.Models.DTOs
+namespace SkillfullAPI.Models.AuthModels.DTOs
 {
-    public class UserRegistrationRequestDto
+    public class UserLoginRequestDto
     {
-        [Required]
-        public string Name { get; set; }
-
         [Required]
         public string Email { get; set; }
 

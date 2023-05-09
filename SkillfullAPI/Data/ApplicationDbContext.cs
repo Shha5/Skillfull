@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
-using SkillfullAPI.Models.AuthorizationModels;
+using SkillfullAPI.Models.AuthModels;
 
 namespace SkillfullAPI.Data
 {

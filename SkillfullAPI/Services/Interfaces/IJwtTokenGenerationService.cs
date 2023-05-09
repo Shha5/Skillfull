@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using SkillfullAPI.Models.AuthorizationModels;
+using SkillfullAPI.Models.AuthModels;
+using SkillfullAPI.Models.AuthModels.DTOs;
 
 namespace SkillfullAPI.Services.Interfaces
 {

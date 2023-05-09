@@ -2,18 +2,16 @@
 {
     public class SkillDetailsModel
     {
-        public SkillCategoryModel category { get; set; }
-        public string description { get; set; }
-        public string descriptionSource { get; set; }
-        public string id { get; set; }
-        public string name { get; set; }
-        public string infoUrl { get; set; }
-        public SkillCategoryModel subcategory { get; set; }
-        public SkillTypeModel type { get; set; }
-    }
-
-    public class SkillDetailsModelData
-    {
-        public SkillDetailsModel data { get; set; }
+        public SkillCategoryModel Category { get; set; }
+        public string Description { get; set; }
+        public string DescriptionSource { get; set; }
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string InfoUrl { get; set; }
+        public SkillCategoryModel Subcategory { get; set; }
+        public SkillTypeModel Type { get; set; }
     }
 }
+
+
+    

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace SkillfullAPI.Models.AuthorizationModels
+namespace SkillfullAPI.Models.AuthModels
 {
     public class RefreshTokenModel
     {

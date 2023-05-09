@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SkillfullAPI.Models.AuthorizationModels
+namespace SkillfullAPI.Models.AuthModels.DTOs
 {
     public class TokenRequestDto
     {

@@ -1,4 +1,4 @@
-﻿namespace SkillfullAPI.Models.AuthorizationModels
+﻿namespace SkillfullAPI.Models.AuthModels
 {
     public class AuthResultModel
     {

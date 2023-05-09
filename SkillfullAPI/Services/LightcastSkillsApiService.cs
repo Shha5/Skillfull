@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SkillfullAPI.Models.LightcastApiModels;
 using SkillfullAPI.Services.Interfaces;
 using System.Net.Http.Headers;
@@ -9,127 +8,124 @@ namespace SkillfullAPI.Services
     public class LightcastSkillsApiService : ILightcastSkillsApiService
     {
         private readonly HttpClient _apiClient;
-        private readonly ILightcastAccessTokenService _lightcastAccessTokenService;
+        private readonly HttpClient _authClient;
+        private readonly IConfiguration _configuration;
         private readonly ILogger<LightcastSkillsApiService> _logger;
 
-        public LightcastSkillsApiService(HttpClient apiClient, ILightcastAccessTokenService lightcastAccessTokenService, ILogger<LightcastSkillsApiService> logger)
+        public LightcastSkillsApiService(HttpClient apiClient, HttpClient authClient, IConfiguration configuration, ILogger<LightcastSkillsApiService> logger)
         {
             _apiClient = apiClient;
-            _lightcastAccessTokenService = lightcastAccessTokenService;
+            _authClient = authClient;
+            _configuration = configuration;
             _logger = logger;
         }
 
-        public async Task<SkillModelData> GetAllSkillsAsync()
+        public async Task<T> GetLightcastSkillsData<T>(string? skillId = null) //think of splitting this into more than one method??
         {
-            string response = await GetAllSkillsResponseAsync();
-            if (!string.IsNullOrEmpty(response))
+            var token = await GetLightcastTokenAsync();
+            _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(token.TokenType, token.AccessToken);
+            string requestUri;
+
+            if(!string.IsNullOrEmpty(skillId))
             {
-                return await DeserializeSkillsApiResponseAsync(response);
+                requestUri = string.Concat("https://emsiservices.com/skills/versions/latest/skills/", skillId);
             }
             else
             {
-                return null;
+                requestUri = "https://emsiservices.com/skills/versions/latest/skills";
             }
-        }
 
-        public async Task<SkillDetailsModelData> GetSkillDetailsByIdAsync(string Id)
-        {
-            string response = await GetSkillDetailsResponseByIdAsync(Id);
-            if (!string.IsNullOrEmpty(response))
-            {
-                return await DeserializeSkillDetailsResponse(response);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-
-        //THINK OF HOW TO MAKE IT MORE DRY
-        private async Task<string> GetAllSkillsResponseAsync()
-        {
-            var token = await _lightcastAccessTokenService.GetLightcastTokenAsync();
-            _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(token.token_type, token.access_token);
-            var response = await _apiClient.GetAsync("https://emsiservices.com/skills/versions/latest/skills");
+            var response = await _apiClient.GetAsync(requestUri);
 
             if (response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadAsStringAsync();
+                string responseAsString = await response.Content.ReadAsStringAsync();
+                if (string.IsNullOrEmpty(responseAsString))
+                {
+                    return default(T);
+                }
+                T lightcastSkillsData = await DeserializeApiResponseAsync<T>(responseAsString);
+                if(lightcastSkillsData == null)
+                {
+                    return default(T);
+                }
+                return lightcastSkillsData;
             }
             else
             {
-                _logger.LogInformation(nameof(LightcastAccessTokenService), $"Request to auth.emsicloud.com/connect/token returned {response.StatusCode}");
-                return null;
+                _logger.LogInformation(nameof(LightcastSkillsApiService), $"Request to auth.emsicloud.com/connect/token returned {response.StatusCode}");
+                return default(T);
             }
         }
 
-        private async Task<string> GetSkillDetailsResponseByIdAsync(string skillId)
+        private async Task<T> DeserializeApiResponseAsync<T>(string responseJson)
         {
-            var token = await _lightcastAccessTokenService.GetLightcastTokenAsync();
-            _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(token.token_type, token.access_token);
-            var response = await _apiClient.GetAsync(string.Concat("https://emsiservices.com/skills/versions/latest/skills/", skillId));
-
-            if (response.IsSuccessStatusCode)
+            if (!string.IsNullOrEmpty(responseJson))
             {
-                return await response.Content.ReadAsStringAsync();
-            }
-            else
-            {
-                _logger.LogInformation(nameof(LightcastAccessTokenService), $"Request to auth.emsicloud.com/connect/token returned {response.StatusCode}");
-                return null;
-            }
-        }
-
-        private async Task<SkillDetailsModelData> DeserializeSkillDetailsResponse(string skillDetailsResponse)
-        {
-            if (!string.IsNullOrEmpty(skillDetailsResponse))
-            {
-                SkillDetailsModelData result;
-
+                T result;
                 try
                 {
-                    result = JsonConvert.DeserializeObject<SkillDetailsModelData>(skillDetailsResponse);
-
+                    result = JsonConvert.DeserializeObject<T>(responseJson);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogInformation(nameof(LightcastAccessTokenService), $"Deserialization failed. {ex.Message}");
-                    return null;
+                    _logger.LogInformation(nameof(LightcastSkillsApiService), $"Deserialization failed. {ex.Message}");
+                    return default(T);
                 }
                 return result;
             }
             else
             {
-                _logger.LogInformation(nameof(LightcastAccessTokenService), $"Failed to receive information from auth/emsicloud");
-                return null;
+                _logger.LogInformation(nameof(LightcastSkillsApiService), $"Failed to receive information from Lightcast Api");
+                return default(T);
             }
         }
 
-        private async Task<SkillModelData> DeserializeSkillsApiResponseAsync(string skillsResponse)
+        private async Task<LightcastAuthTokenModel> GetLightcastTokenAsync()
         {
-            if (!string.IsNullOrEmpty(skillsResponse))
+            var accessInfo = _configuration.GetSection("LightcastApi");
+
+            if (accessInfo == null)
             {
-               SkillModelData result;
+                _logger.LogInformation(nameof(LightcastSkillsApiService), $"Couldn't retrieve access information from secrets.json");
+                return null;
+            }
 
-                try
-                {
-                    result = JsonConvert.DeserializeObject<SkillModelData>(skillsResponse);
+            string clientId = accessInfo.GetValue<string>("ClientId");
+            string secret = accessInfo.GetValue<string>("Secret");
+            string scope = accessInfo.GetValue<string>("Scope");
 
-                }
-                catch (Exception ex)
+            var values = new Dictionary<string, string>
+            {
+                 {"client_id", clientId },
+                 {"client_secret", secret},
+                 {"grant_type", "client_credentials"},
+                 {"scope", scope},
+            };
+
+            var requestContent = new FormUrlEncodedContent(values);
+            var response = await _authClient.PostAsync("https://auth.emsicloud.com/connect/token", requestContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseAsString = await response.Content.ReadAsStringAsync();
+                if (string.IsNullOrEmpty(responseAsString))
                 {
-                    _logger.LogInformation(nameof(LightcastAccessTokenService), $"Deserialization failed. {ex.Message}");
                     return null;
                 }
-                return result;
+
+                LightcastAuthTokenModel token = await DeserializeApiResponseAsync<LightcastAuthTokenModel>(responseAsString);
+                if (token == null)
+                {
+                    return null;
+                }
+                return token;
             }
             else
             {
-                _logger.LogInformation(nameof(LightcastAccessTokenService), $"Failed to receive information from auth/emsicloud");
+                _logger.LogInformation(nameof(LightcastSkillsApiService), $"Request to auth.emsicloud.com/connect/token returned {response.StatusCode}");
                 return null;
             }
         }
-
     }
 }

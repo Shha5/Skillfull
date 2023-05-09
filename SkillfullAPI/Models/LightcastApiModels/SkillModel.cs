@@ -2,14 +2,9 @@
 {
     public class SkillModel
     {
-        public string id { get; set; }
-        public string name { get; set; }
-        public string infoUrl { get; set; }
-        public SkillTypeModel type { get; set; }
-    }
-
-    public class SkillModelData
-    {
-        public SkillModel[] data { get; set; }
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string InfoUrl { get; set; }
+        public SkillTypeModel Type { get; set; }
     }
 }

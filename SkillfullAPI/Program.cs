@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SkillfullAPI.Data;
 using SkillfullAPI.Services;
@@ -42,11 +41,12 @@ builder.Services.AddAuthentication(options =>
         jwt.TokenValidationParameters = tokenValidationParameters;
     });
 
-
-builder.Services.AddHttpClient<ILightcastAccessTokenService, LightcastAccessTokenService>(client =>
+builder.Services.AddHttpClient<ILightcastSkillsApiService, LightcastSkillsApiService>(client =>
 client.BaseAddress = new Uri("https://auth.emsicloud.com/connect/token"));
+
 builder.Services.AddHttpClient<ILightcastSkillsApiService, LightcastSkillsApiService>(client =>
 client.BaseAddress = new Uri("https://emsiservices.com/skills/versions/latest/"));
+
 builder.Services.AddTransient<ISendGridEmailService, SendGridEmailService>();
 builder.Services.AddScoped<IJwtTokenGenerationService, JwtTokenGenerationService>();
 builder.Services.AddControllers();
@@ -64,10 +64,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

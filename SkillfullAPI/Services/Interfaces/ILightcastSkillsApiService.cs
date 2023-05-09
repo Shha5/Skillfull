@@ -4,7 +4,6 @@ namespace SkillfullAPI.Services.Interfaces
 {
     public interface ILightcastSkillsApiService
     {
-        Task<SkillModelData> GetAllSkillsAsync();
-        Task<SkillDetailsModelData> GetSkillDetailsByIdAsync(string Id);
+        Task<T> GetLightcastSkillsData<T>(string? skillId = null);
     }
 }

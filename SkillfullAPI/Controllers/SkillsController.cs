@@ -9,21 +9,18 @@ namespace SkillfullAPI.Controllers
     [Route("api/[controller]")]
     public class SkillsController : ControllerBase
     {
-        private readonly ILogger<SkillsController> _logger;
         private readonly ILightcastSkillsApiService _skillsApiService;
 
-        public SkillsController(ILogger<SkillsController> logger, ILightcastSkillsApiService skillsApiService)
+        public SkillsController(ILightcastSkillsApiService skillsApiService)
         {
-            _logger = logger;
             _skillsApiService = skillsApiService;
         }
 
-
         [HttpGet]
         [Route("getAllSkills")]
-        public async Task<SkillModelData> GetAllSkills()
+        public async Task<SkillDataModel> GetAllSkills()
         {
-            SkillModelData result = await _skillsApiService.GetAllSkillsAsync();
+            SkillDataModel result = await _skillsApiService.GetLightcastSkillsData<SkillDataModel>();
             if(result == null)
             {
                 return null;
@@ -33,9 +30,9 @@ namespace SkillfullAPI.Controllers
 
         [HttpGet]
         [Route("getSkillDetailsById")]
-        public async Task<SkillDetailsModelData> GetSkillDetailsById(string Id)
+        public async Task<SkillDetailsDataModel> GetSkillDetailsById(string skillId)
         {
-            SkillDetailsModelData result = await _skillsApiService.GetSkillDetailsByIdAsync(Id);
+            SkillDetailsDataModel result = await _skillsApiService.GetLightcastSkillsData<SkillDetailsDataModel>(skillId);
             if(result == null)
             {
                 return null;

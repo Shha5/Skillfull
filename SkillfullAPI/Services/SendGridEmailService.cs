@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using SendGrid.Helpers.Mail;
+﻿using SendGrid.Helpers.Mail;
 using SendGrid;
 using SkillfullAPI.Services.Interfaces;
 
@@ -31,7 +30,7 @@ namespace SkillfullAPI.Services
             var client = new SendGridClient(apiKey);
             var msg = new SendGridMessage()
             {
-                From = new EmailAddress(fromEmail), //Later change email or store it in secrets if we want to make the repo public
+                From = new EmailAddress(fromEmail), 
                 Subject = subject,
                 PlainTextContent = message,
                 HtmlContent = message
