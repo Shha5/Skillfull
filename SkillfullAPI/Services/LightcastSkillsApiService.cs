@@ -20,21 +20,12 @@ namespace SkillfullAPI.Services
             _logger = logger;
         }
 
-        public async Task<T> GetLightcastSkillsData<T>(string? skillId = null) //think of splitting this into more than one method??
+        public async Task<T> GetLightcastSkillsData<T>(string? skillId = null) 
         {
             var token = await GetLightcastTokenAsync();
             _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(token.TokenType, token.AccessToken);
-            string requestUri;
-
-            if(!string.IsNullOrEmpty(skillId))
-            {
-                requestUri = string.Concat("https://emsiservices.com/skills/versions/latest/skills/", skillId);
-            }
-            else
-            {
-                requestUri = "https://emsiservices.com/skills/versions/latest/skills";
-            }
-
+            
+            string requestUri = CreateRequestUri(skillId);
             var response = await _apiClient.GetAsync(requestUri);
 
             if (response.IsSuccessStatusCode)
@@ -44,6 +35,7 @@ namespace SkillfullAPI.Services
                 {
                     return default(T);
                 }
+               
                 T lightcastSkillsData = await DeserializeApiResponseAsync<T>(responseAsString);
                 if(lightcastSkillsData == null)
                 {
@@ -56,6 +48,22 @@ namespace SkillfullAPI.Services
                 _logger.LogInformation(nameof(LightcastSkillsApiService), $"Request to auth.emsicloud.com/connect/token returned {response.StatusCode}");
                 return default(T);
             }
+        }
+
+        private string CreateRequestUri(string? skillId = null)
+        {
+            string requestUri;
+
+            if (!string.IsNullOrEmpty(skillId))
+            {
+                requestUri = string.Concat("https://emsiservices.com/skills/versions/latest/skills/", skillId);
+            }
+            else
+            {
+                requestUri = "https://emsiservices.com/skills/versions/latest/skills";
+            }
+
+            return requestUri;
         }
 
         private async Task<T> DeserializeApiResponseAsync<T>(string responseJson)

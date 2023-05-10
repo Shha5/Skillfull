@@ -1,3 +1,6 @@
+using DataAccessLibrary.Data;
+using DataAccessLibrary.Data.Interfaces;
+using DataAccessLibrary.DataAccess;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +52,8 @@ client.BaseAddress = new Uri("https://emsiservices.com/skills/versions/latest/")
 
 builder.Services.AddTransient<ISendGridEmailService, SendGridEmailService>();
 builder.Services.AddScoped<IJwtTokenGenerationService, JwtTokenGenerationService>();
+builder.Services.AddSingleton<ISqlDataAccess, SqlDataAccess>();
+builder.Services.AddSingleton<IUserSkillsData, UserSkillsData>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

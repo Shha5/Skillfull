@@ -4,17 +4,10 @@ AS
 BEGIN
 SET NOCOUNT ON
 
-	SELECT [UserSkills].[Id], [UserSkills].[SkillId], [UserSkills].[SkillAssessmentId], [UserSkills].[SkillName], 
-	[UserSkillTasks].[Name], [UserSkillTasks].[Description], [UserSkillTasks].[CreatedDate], [UserSkillTasks].[ModifiedDate], [UserSkillTasks].[Status],
-	[TaskStatus].[Name]
+	SELECT [UserSkills].[Id], [UserSkills].[SkillId], [UserSkills].[SkillAssessmentId], [UserSkills].[SkillName]
 
 	FROM [UserSkills]
 
-	JOIN [UserSkillTasks]
-	ON [UserSkills].[Id] = [UserSkillTasks].[UserSkillId]
-
-	JOIN [TaskStatus]
-	ON [UserSkillTasks].[Status] = [TaskStatus].[Id]
 
 	WHERE [UserSkills].UserId = @userId
 

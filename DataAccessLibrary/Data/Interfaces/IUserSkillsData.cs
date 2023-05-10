@@ -6,6 +6,6 @@ namespace DataAccessLibrary.Data.Interfaces
     {
         Task AddUserSkill(string userId, UserSkillDataModel userSkill);
         List<UserSkillDataModel> GetUserSkills(string userId);
-        Task UpdateUserSkillAssessment(int userSkillAssessment);
+        //Task UpdateUserSkillAssessment(int userSkillAssessment);
     }
 }

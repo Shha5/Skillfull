@@ -11,7 +11,7 @@ namespace DataAccessLibrary.Models
         public int? Id { get; set; } = null;
         public string SkillId { get; set; }
         public string SkillName { get; set; }
-        public int SkillAssessment { get; set; }
+        public int SkillAssessmentId { get; set; }
         
     }
 }
