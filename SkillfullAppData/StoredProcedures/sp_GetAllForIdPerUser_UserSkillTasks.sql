@@ -1,12 +1,12 @@
-﻿CREATE PROCEDURE [dbo].[sp_GetAllForId_UserSkillTasks]
-	@userSkillId int
+﻿CREATE PROCEDURE [dbo].[sp_GetAllForIdPerUser_UserSkillTasks]
+	@userId NVARCHAR(50)
 AS
 BEGIN
 SET NOCOUNT ON
 	SELECT [UserSkillTasks].[Id], [UserSkillTasks].[Name], [UserSkillTasks].[Description], [UserSkillTasks].[StatusId], [UserSkillTasks].[CreatedDate], [UserSkillTasks].[ModifiedDate],
-	[TaskStatus].[Name]
+	 [UserSkillTasks].[UserSkillId]
 FROM UserSkillTasks
-JOIN TaskStatus ON [UserSkillTasks].[StatusId] = [TaskStatus].[Id]
 
-WHERE [UserSkillTasks].[UserSkillId] = @userSkillId
+
+WHERE [UserSkillTasks].[UserId] = @userId
 END

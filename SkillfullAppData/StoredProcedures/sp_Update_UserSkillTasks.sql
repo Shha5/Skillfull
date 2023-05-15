@@ -8,7 +8,7 @@ AS
 BEGIN
 
 UPDATE UserSkillTasks
-SET [Name] = @Name, [Description] = @Description, [Status] = @Status, [ModifiedDate] = getdate()
+SET [Name] = @Name, [Description] = @Description, [StatusId] = @Status, [ModifiedDate] = getdate()
 WHERE [Id] = @Id
 
 END
