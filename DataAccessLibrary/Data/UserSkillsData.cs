@@ -37,8 +37,14 @@ namespace DataAccessLibrary.Data
              _sqlDataAccess.SaveData("dbo.sp_Add_UserSkillTasks", new { userSkillTask.UserSkillId, userSkillTask.Name, userSkillTask.Description, userSkillTask.StatusId, userId });
 
 
-        //public Task UpdateUserSkillAssessment(int userSkillAssessment) =>
-        //    _sqlDataAccess.SaveData("SkillfullAppData.sp_Add_UserSkills", new { userSkillAssessment });
+        public Task UpdateUserSkillAssessment(int userSkillId, int skillAssessmentId) =>
+            _sqlDataAccess.SaveData("dbo.sp_Update_UserSkills", new { userSkillId, skillAssessmentId });
+
+        public Task UpdateUserSkillTasks(UserSkillTaskDataModel userSkillTask) =>
+            _sqlDataAccess.SaveData("dbo.sp_Update_UserSkillTasks", new { userSkillTask.Id, userSkillTask.Name, userSkillTask.Description, userSkillTask.StatusId });
+
+        public Task DeleteUserSkills(int userSkillId) =>
+            _sqlDataAccess.SaveData("dbo.sp_Delete_UserSkills", new { userSkillId });
 
     }
 }

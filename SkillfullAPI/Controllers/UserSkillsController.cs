@@ -71,7 +71,31 @@ namespace SkillfullAPI.Controllers
         }
 
         [HttpPost]
-        [Route("addUserSkillTask")]
+        [Route("updateUserSkillAssessment")]
+        public async Task<IActionResult> UpdateUserSkillAssessment(int userSkillId, int newUserSkillAssessmentId)
+        {
+            if (newUserSkillAssessmentId == null || newUserSkillAssessmentId <= 0 || newUserSkillAssessmentId > 5 || userSkillId == null)
+            {
+                return BadRequest("Request not valid");
+            }
+            await _userSkillsData.UpdateUserSkillAssessment(userSkillId, newUserSkillAssessmentId);
+            return Ok("Successfully updated.");
+        }
+
+        [HttpPost]
+        [Route("deleteUserSkill")]
+        public async Task<IActionResult> DeleteUserSkill(int userSkillId)
+        {
+            if(userSkillId == null)
+            {
+                return BadRequest("Invalid request");
+            }
+            await _userSkillsData.DeleteUserSkills(userSkillId);
+            return Ok("Record deleted permanently.");
+        }
+
+        [HttpPost]
+            [Route("addUserSkillTask")]
         public async Task<string> AddUserSkillTask(string userId, UserSkillTaskModel userSkillTaskModel)
         {
             if (ModelState.IsValid && !string.IsNullOrEmpty(userId))
@@ -128,6 +152,25 @@ namespace SkillfullAPI.Controllers
                 });
             }
             return userSkillTasks;
+        }
+
+        [HttpPost]
+        [Route("updateUserSkillTask")]
+        public async Task<IActionResult> UpdateUserSkillTask(UserSkillTaskModel userSkillTask, int userSkillTaskId)
+        {
+            if(ModelState.IsValid)
+            {
+                await _userSkillsData.UpdateUserSkillTasks(new UserSkillTaskDataModel
+                {
+                    Id = userSkillTaskId,
+                    StatusId = userSkillTask.StatusId,
+                    Name = userSkillTask.Name,
+                    Description = userSkillTask.Description,
+                    ModifiedDate = DateTime.UtcNow
+                });
+                return Ok("Updated successfully");
+            }
+            return BadRequest("Invalid request");
         }
     }
 }

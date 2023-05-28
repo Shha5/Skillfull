@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 using SkillfullAPI.Models.LightcastApiModels;
 using SkillfullAPI.Services.Interfaces;
 

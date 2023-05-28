@@ -70,8 +70,8 @@
     <Build Include="StoredProcedures\sp_Update_UserSkills.sql" />
     <Build Include="StoredProcedures\sp_Add_UserSkillTasks.sql" />
     <Build Include="StoredProcedures\sp_Update_UserSkillTasks.sql" />
-    <Build Include="StoredProcedures\sp_GetAllForId_UserSkillTasks.sql" />
     <Build Include="StoredProcedures\sp_GetAllForIdPerUser_UserSkillTasks.sql" />
+    <Build Include="StoredProcedures\sp_Delete_UserSkills.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\SkillfullAppData.publish.xml" />
