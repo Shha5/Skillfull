@@ -46,6 +46,9 @@ namespace DataAccessLibrary.Data
         public Task DeleteUserSkills(int userSkillId) =>
             _sqlDataAccess.SaveData("dbo.sp_Delete_UserSkills", new { userSkillId });
 
+        public Task DeleteUserSkillTasks(int userSkillTaskId) =>
+            _sqlDataAccess.SaveData("dbo.sp_Delete_UserSkillTasks", new { userSkillTaskId });
+
     }
 }
 

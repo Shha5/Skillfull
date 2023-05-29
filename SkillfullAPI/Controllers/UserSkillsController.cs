@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using DataAccessLibrary.Data;
 using SkillfullAPI.Models.AppModels;
-using Microsoft.AspNetCore.Http.HttpResults;
 using DataAccessLibrary.Data.Interfaces;
 using DataAccessLibrary.Models;
-using System.Globalization;
 
 namespace SkillfullAPI.Controllers
 {
@@ -23,7 +20,7 @@ namespace SkillfullAPI.Controllers
 
         [HttpPost]
         [Route("addUserSkill")]
-        public async Task<string> AddUserSkill(UserSkillModel userSkillModel, string userId)
+        public async Task<IActionResult> AddUserSkill(UserSkillModel userSkillModel, string userId)
         {
             if (ModelState.IsValid && !string.IsNullOrEmpty(userId))
             {
@@ -36,11 +33,11 @@ namespace SkillfullAPI.Controllers
                 };
 
                await _userSkillsData.AddUserSkill(userId, userSkill);
-                return "Skill successfully assigned to a user.";
+                return Ok();
             } 
             else
             {
-                return "Request not valild.";
+                return BadRequest("Request not valild.");
             }
         }
 
@@ -71,8 +68,8 @@ namespace SkillfullAPI.Controllers
         }
 
         [HttpPost]
-        [Route("updateUserSkillAssessment")]
-        public async Task<IActionResult> UpdateUserSkillAssessment(int userSkillId, int newUserSkillAssessmentId)
+        [Route("updateUserSkill")]
+        public async Task<IActionResult> UpdateUserSkill(int userSkillId, int newUserSkillAssessmentId)
         {
             if (newUserSkillAssessmentId == null || newUserSkillAssessmentId <= 0 || newUserSkillAssessmentId > 5 || userSkillId == null)
             {
@@ -96,7 +93,7 @@ namespace SkillfullAPI.Controllers
 
         [HttpPost]
             [Route("addUserSkillTask")]
-        public async Task<string> AddUserSkillTask(string userId, UserSkillTaskModel userSkillTaskModel)
+        public async Task<IActionResult> AddUserSkillTask(string userId, UserSkillTaskModel userSkillTaskModel)
         {
             if (ModelState.IsValid && !string.IsNullOrEmpty(userId))
             {
@@ -114,13 +111,13 @@ namespace SkillfullAPI.Controllers
                 }
                 catch(Exception ex)
                 {
-                    return ex.Message;
+                    return NotFound(ex.Message);
                 }
-                return "Task successfully added to user and skill.";
+                return Ok("Task successfully added to user and skill.");
             }
             else
             {
-                return "Request not valid";
+                return BadRequest("Request not valid");
             }
         }
 
@@ -171,6 +168,18 @@ namespace SkillfullAPI.Controllers
                 return Ok("Updated successfully");
             }
             return BadRequest("Invalid request");
+        }
+
+        [HttpPost]
+        [Route("deleteUserSkillTask")]
+        public async Task<IActionResult> DeleteUserSkillTask(int userSkillTaskId)
+        {
+            if(userSkillTaskId == null)
+            {
+                return BadRequest();
+            }
+            await _userSkillsData.DeleteUserSkillTasks(userSkillTaskId);
+            return Ok();
         }
     }
 }

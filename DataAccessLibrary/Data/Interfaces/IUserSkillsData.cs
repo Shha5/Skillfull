@@ -12,5 +12,6 @@ namespace DataAccessLibrary.Data.Interfaces
         Task UpdateUserSkillAssessment(int userSkillId, int skillAssessmentId);
         Task UpdateUserSkillTasks(UserSkillTaskDataModel userSkillTask);
         Task DeleteUserSkills(int userSkillId);
+        Task DeleteUserSkillTasks(int userSkillTaskId);
     }
 }
