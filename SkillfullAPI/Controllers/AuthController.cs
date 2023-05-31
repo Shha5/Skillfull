@@ -40,7 +40,7 @@ namespace SkillfullAPI.Controllers
                 });
             }
             var user = await _userManager.FindByIdAsync(userId);
-            //var decodedEmailConfirmationToken = HttpUtility.UrlDecode(emailConfirmationToken);
+            //var token = HttpUtility.UrlDecode(emailConfirmationToken);
             var result = await _userManager.ConfirmEmailAsync(user, emailConfirmationToken);
             if (result.Succeeded)
             {
@@ -262,8 +262,8 @@ namespace SkillfullAPI.Controllers
                 });
             }
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            //var encodedEmailConfirmationToken = HttpUtility.UrlEncode(emailConfirmationToken);
-            var callbackUrl = string.Concat("https://localhost:7154/Auth/ConfirmEmail?", "userId=", user.Id, "&emailConfirmationToken=", emailConfirmationToken); //change to redirect to mvc app view 
+            var encodedEmailConfirmationToken = HttpUtility.UrlEncode(emailConfirmationToken);
+            var callbackUrl = string.Concat("https://localhost:7154/Auth/ConfirmEmail?", "userId=", user.Id, "&emailConfirmationToken=", encodedEmailConfirmationToken); //change to redirect to mvc app view 
             string subject = "Email verification for Skillfull";
             string message = "You can verify your email by clicking this" + "<a href=\"" + callbackUrl + "\"> link</a>";
 

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using SkillfullWebUI.Models.AuthModels;
 using SkillfullWebUI.Models.SkillModels;
 using SkillfullWebUI.Services.Interfaces;
+using System.Web;
 using static System.Net.WebRequestMethods;
 
 namespace SkillfullWebUI.Services
@@ -92,7 +93,8 @@ namespace SkillfullWebUI.Services
         public async Task<HttpResponseMessage> ConfirmEmail(EmailConfirmationModel emailConfirmation)
         {
             string baseUrl = "https://localhost:7071/api/Auth/ConfirmEmail";
-            string url = string.Concat(baseUrl, "?userId=", emailConfirmation.UserId, "&emailConfirmationToken=", emailConfirmation.EmailConfirmationToken);
+            var token = HttpUtility.UrlEncode(emailConfirmation.EmailConfirmationToken);
+            string url = string.Concat(baseUrl, "?userId=", emailConfirmation.UserId, "&emailConfirmationToken=", token);
             return await _apiClient.PostAsync(url, null);
            
         }
