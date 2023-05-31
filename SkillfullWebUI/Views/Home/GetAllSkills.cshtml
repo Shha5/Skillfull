@@ -1,0 +1,7 @@
+﻿@using SkillfullWebUI.Models.SkillModels;
+@model List<SkillModel>;
+
+@foreach(SkillModel skill in Model)
+{
+    <h2>@skill.Name</h2>
+}

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SkillfullAPI.Models.AuthModels.DTOs
+namespace SkillfullWebUI.Models.AuthModels
 {
-    public class UserRegistrationRequestDto
+    public class RegistrationRequestModel
     {
         [Required]
         [Display(Name = "Name")]
@@ -24,6 +24,6 @@ namespace SkillfullAPI.Models.AuthModels.DTOs
         [DataType(DataType.Password)]
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-        public string ConfirmPassword { get; set; }
+        public string ConfirmPassword { get; set;}
     }
 }

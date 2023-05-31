@@ -16,7 +16,7 @@ namespace DataAccessLibrary.DataAccess
             _configuration = configuration;
         }
 
-        public async Task<IEnumerable<T>> LoadData<T, U>(string storedProcedure, U parameters, string connectionString = "DefaultConnection")
+        public async Task<IEnumerable<T>> LoadData<T, U>(string storedProcedure, U parameters, string connectionString = "AppDataDbConnection")
         {
             using (IDbConnection connection = new SqlConnection(_configuration.GetConnectionString(connectionString)))
             {
@@ -25,7 +25,7 @@ namespace DataAccessLibrary.DataAccess
             }
         }
 
-        public async Task SaveData<T>(string storedProcedure, T parameters, string connectionString = "DefaultConnection")
+        public async Task SaveData<T>(string storedProcedure, T parameters, string connectionString = "AppDataDbConnection")
         {
             using (IDbConnection connection = new SqlConnection(_configuration.GetConnectionString(connectionString)))
             {

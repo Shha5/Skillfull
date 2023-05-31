@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using SkillfullAPI.Models.AuthModels;
 using SkillfullAPI.Models.AuthModels.DTOs;
 using SkillfullAPI.Services.Interfaces;
-
+using System.Net;
+using System.Web;
 
 namespace SkillfullAPI.Controllers
 {
@@ -24,6 +25,7 @@ namespace SkillfullAPI.Controllers
 
         [HttpPost]
         [Route("ConfirmEmail")]
+       
         public async Task<IActionResult> ConfirmEmail(string userId, string emailConfirmationToken)
         {
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(emailConfirmationToken))
@@ -38,6 +40,7 @@ namespace SkillfullAPI.Controllers
                 });
             }
             var user = await _userManager.FindByIdAsync(userId);
+            //var decodedEmailConfirmationToken = HttpUtility.UrlDecode(emailConfirmationToken);
             var result = await _userManager.ConfirmEmailAsync(user, emailConfirmationToken);
             if (result.Succeeded)
             {
@@ -157,7 +160,7 @@ namespace SkillfullAPI.Controllers
 
         [HttpPost]
         [Route("Register")]
-        public async Task<IActionResult> Register([FromBody] UserRegistrationRequestDto registerRequestDto)
+        public async Task<IActionResult> Register([FromForm] UserRegistrationRequestDto registerRequestDto)
         {
             if (ModelState.IsValid)
             {
@@ -183,7 +186,8 @@ namespace SkillfullAPI.Controllers
                 if (isCreated.Succeeded)
                 {
                     var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-                    var callbackUrl = Url.Action("ConfirmEmail", "Auth", new { userId = newUser.Id, emailConfirmationToken = emailConfirmationToken }, protocol: HttpContext.Request.Scheme); //change to redirect to mvc app view 
+                    var encodedEmailConfirmationToken = WebUtility.UrlEncode(emailConfirmationToken);
+                    var callbackUrl = string.Concat("https://localhost:7154/Auth/ConfirmEmail?", "userId=", newUser.Id, "&emailConfirmationToken=", encodedEmailConfirmationToken); //FIX THIS - when deploying the host will change
                     string subject = "Email verification for Skillfull";
                     string message = "You can verify your email by clicking this" + "<a href=\"" + callbackUrl + "\"> link</a>";
                     await _sendGridEmailService.SendEmailAsync(newUser.Email, subject, message);
@@ -258,7 +262,8 @@ namespace SkillfullAPI.Controllers
                 });
             }
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var callbackUrl = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, emailConfirmationToken = emailConfirmationToken }, protocol: HttpContext.Request.Scheme); //change to redirect to mvc app view 
+            //var encodedEmailConfirmationToken = HttpUtility.UrlEncode(emailConfirmationToken);
+            var callbackUrl = string.Concat("https://localhost:7154/Auth/ConfirmEmail?", "userId=", user.Id, "&emailConfirmationToken=", emailConfirmationToken); //change to redirect to mvc app view 
             string subject = "Email verification for Skillfull";
             string message = "You can verify your email by clicking this" + "<a href=\"" + callbackUrl + "\"> link</a>";
 

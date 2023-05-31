@@ -1,0 +1,16 @@
+﻿@using SkillfullWebUI.Models.AuthModels;
+@model EmailConfirmationModel
+
+<h1>Email confirmation</h1>
+@ViewBag.ErrorMessage
+<form asp-controller="Auth" asp-action="ConfirmEmail" method="post" role="form">
+    <hr />
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <input asp-for="EmailConfirmationToken" hidden />
+    <input asp-for="UserId" hidden />
+    <div class="form-group">
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-success form-control">Confirm</button>
+        </div>
+    </div>
+</form>
