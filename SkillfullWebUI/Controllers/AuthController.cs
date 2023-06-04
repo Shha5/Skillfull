@@ -119,7 +119,6 @@ namespace SkillfullWebUI.Controllers
                 var result = await _apiService.Login(login);
                 if(result.IsSuccessStatusCode)
                 {
-                    result
                     return LocalRedirect(returnUrl);
                 }
             }
