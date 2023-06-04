@@ -63,14 +63,67 @@ namespace SkillfullWebUI.Controllers
                 else
                 {
                     ViewBag.ErrorMessafe = "Verification failed";
-                    return View();
+                    return View("ResendEmailConfirmation");
                 }
             }
             else
             {
                 ViewBag.ErrorMessage = "Verification link is not valid.";
-                return View();
+                return View("ResendEmailConfirmation");
             }
+        }
+
+        [HttpGet]
+        public IActionResult ResendEmailConfirmation()
+        {
+            ResendEmailConfirmationModel resendEmailConfirmation = new ResendEmailConfirmationModel();
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResendEmailConfirmation(ResendEmailConfirmationModel resendEmailConfirmation)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _apiService.ResendEmailConfirmation(resendEmailConfirmation);
+                
+                if(result.IsSuccessStatusCode) 
+                {
+                    return View("ResendEmailConfirmationSuccess");
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = "Failed to resend email confirmation";
+                    return View();
+                }
+            }
+            ViewBag.ErrorMessage = "Invalid credentials";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Login(string? returnUrl = null)
+        {
+            LoginModel login = new LoginModel();
+            login.ReturnUrl = returnUrl ?? Url.Content("~/");
+            return View(login);
+        }
+
+        public async Task<IActionResult> Login(LoginModel login, string? returnUrl)
+        {
+            if (ModelState.IsValid)
+            {
+                login.ReturnUrl = returnUrl;
+                returnUrl = returnUrl ?? Url.Content("~/");
+            
+                var result = await _apiService.Login(login);
+                if(result.IsSuccessStatusCode)
+                {
+                    result
+                    return LocalRedirect(returnUrl);
+                }
+            }
+            return View();
         }
     }
 

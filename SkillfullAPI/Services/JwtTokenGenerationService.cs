@@ -62,12 +62,16 @@ namespace SkillfullAPI.Services
             await _context.RefreshTokens.AddAsync(refreshToken);
             await _context.SaveChangesAsync();
 
+            
+     
+
             return new AuthResultModel()
             {
                 Result = true,
                 Token = jwtToken,
                 RefreshToken = refreshToken.Token
             };
+
         }
 
         public async Task<AuthResultModel> VerifyAndGenerateToken(TokenRequestDto tokenRequest)

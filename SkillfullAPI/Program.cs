@@ -2,10 +2,12 @@ using DataAccessLibrary.Data;
 using DataAccessLibrary.Data.Interfaces;
 using DataAccessLibrary.DataAccess;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SkillfullAPI.Data;
 using SkillfullAPI.Services;
@@ -41,10 +43,22 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(jwt =>
     {
-        
+
         jwt.SaveToken = true;
         jwt.TokenValidationParameters = tokenValidationParameters;
+        //jwt.Events.OnMessageReceived = context =>
+        //{
+
+        //    if (context.Request.Cookies.ContainsKey("token"))
+        //    {
+        //        context.Token = context.Request.Cookies["token"];
+        //    }
+        //    return Task.CompletedTask;
+        //};
     });
+
+
+
 
 builder.Services.AddHttpClient<ILightcastSkillsApiService, LightcastSkillsApiService>(client =>
 client.BaseAddress = new Uri("https://auth.emsicloud.com/connect/token"));

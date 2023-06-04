@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using SkillfullAPI.Models.AuthModels;
 using SkillfullAPI.Models.AuthModels.DTOs;
 using SkillfullAPI.Services.Interfaces;
@@ -86,7 +87,7 @@ namespace SkillfullAPI.Controllers
 
         [HttpPost]
         [Route("Login")]
-        public async Task<IActionResult> Login([FromBody] UserLoginRequestDto loginRequest)
+        public async Task<IActionResult> Login([FromForm] UserLoginRequestDto loginRequest)
         {
             if (ModelState.IsValid)
             {
@@ -115,7 +116,28 @@ namespace SkillfullAPI.Controllers
                     });
                 }
                 var jwtToken = await _jwtTokenGenerationService.GenerateJwtToken(user);
-                return Ok(jwtToken);
+
+                
+
+                Response.Cookies.Append("token", jwtToken.Token, new CookieOptions 
+                {
+                   
+                    Secure = true,
+                    HttpOnly = true,
+                    Expires = DateTime.UtcNow.AddDays(2),
+                    IsEssential = true,
+                    SameSite = SameSiteMode.None
+            });
+                Response.Cookies.Append("refreshToken", jwtToken.RefreshToken, new CookieOptions
+                {
+                    
+                    Secure = true,
+                    HttpOnly = true,
+                    Expires = DateTime.UtcNow.AddDays(20),
+                    IsEssential = true,
+                    SameSite = SameSiteMode.None
+                }); 
+                return Ok();
             }
             return BadRequest(new AuthResultModel()
             {
@@ -211,9 +233,9 @@ namespace SkillfullAPI.Controllers
             return BadRequest();
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("ResendEmailConfirmation")]
-        public async Task<IActionResult> ResendEmailConfirmation(string email, string password)
+        public async Task<IActionResult> ResendEmailConfirmation([FromForm]string email, [FromForm]string password)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {

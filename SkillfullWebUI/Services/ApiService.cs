@@ -100,6 +100,20 @@ namespace SkillfullWebUI.Services
         }
         // Forgot password
         //Login
+        public async Task<HttpResponseMessage> Login(LoginModel login)
+        {
+            string url = "https://localhost:7071/api/Auth/Login";
+            var values = new Dictionary<string, string>()
+            {
+                { "Email", login.Email },
+                { "Password", login.Password }
+            };
+
+            var requestContent = new FormUrlEncodedContent(values);
+
+            return await _apiClient.PostAsync(url, requestContent);
+        }
+
         //Register
         public async Task<HttpResponseMessage> Register(RegistrationRequestModel registrationRequest)
         {
@@ -117,8 +131,21 @@ namespace SkillfullWebUI.Services
         }
         //RefreshTOken --> not available to user directly
 
-        //public async Task<AuthResultModel>
+       
         //Resend Email confirmation
+        public async Task<HttpResponseMessage> ResendEmailConfirmation(ResendEmailConfirmationModel resendEmailConfirmation)
+        {
+            string url = "https://localhost:7071/api/Auth/ResendEmailConfirmation";
+            var values = new Dictionary<string, string>()
+            {
+                {"Email", resendEmailConfirmation.Email },
+                { "Password", resendEmailConfirmation.Password}
+            };
+
+            var requestContent = new FormUrlEncodedContent(values);
+            return await _apiClient.PostAsync(url, requestContent);
+        }
+
         //Reset password
 
 
