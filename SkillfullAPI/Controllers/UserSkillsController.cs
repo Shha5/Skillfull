@@ -92,7 +92,7 @@ namespace SkillfullAPI.Controllers
         }
 
         [HttpPost]
-            [Route("addUserSkillTask")]
+        [Route("addUserSkillTask")]
         public async Task<IActionResult> AddUserSkillTask(string userId, UserSkillTaskModel userSkillTaskModel)
         {
             if (ModelState.IsValid && !string.IsNullOrEmpty(userId))

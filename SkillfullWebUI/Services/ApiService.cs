@@ -20,7 +20,7 @@ namespace SkillfullWebUI.Services
         {
             _logger = logger;
             _apiClient = apiClient;
-       
+
         }
         //LIGHTCAST
         //get all skills 
@@ -28,13 +28,13 @@ namespace SkillfullWebUI.Services
         public async Task<List<SkillModel>> GetAllSkills()
         {
             string apiResponseString = await GetAllSkillsApiResponse();
-            if(string.IsNullOrEmpty(apiResponseString))
+            if (string.IsNullOrEmpty(apiResponseString))
             {
                 return null;
             }
             SkillDataModel skillData = await DeserializeApiResponseAsync<SkillDataModel>(apiResponseString);
             List<SkillModel> skills = new List<SkillModel>();
-            foreach(var skill in skillData.Data)
+            foreach (var skill in skillData.Data)
             {
                 skills.Add(skill);
             }
@@ -60,7 +60,7 @@ namespace SkillfullWebUI.Services
         public async Task<SkillDetailsModel> GetSkillDetailsById(string skillId)
         {
             string apiResponseString = await GetSkillDetailsApiResponse(skillId);
-            if(string.IsNullOrEmpty(apiResponseString))
+            if (string.IsNullOrEmpty(apiResponseString))
             {
                 return null;
             }
@@ -96,11 +96,11 @@ namespace SkillfullWebUI.Services
             var token = HttpUtility.UrlEncode(emailConfirmation.EmailConfirmationToken);
             string url = string.Concat(baseUrl, "?userId=", emailConfirmation.UserId, "&emailConfirmationToken=", token);
             return await _apiClient.PostAsync(url, null);
-           
+
         }
         // Forgot password
         //Login
-        public async Task<HttpResponseMessage> Login(LoginModel login)
+        public async Task<AuthResultModel> Login(LoginModel login)
         {
             string url = "https://localhost:7071/api/Auth/Login";
             var values = new Dictionary<string, string>()
@@ -110,8 +110,24 @@ namespace SkillfullWebUI.Services
             };
 
             var requestContent = new FormUrlEncodedContent(values);
+            var apiResponse = await _apiClient.PostAsync(url, requestContent);
+            if (!apiResponse.IsSuccessStatusCode)
+            {
+                return new AuthResultModel()
+                {
+                    Errors = new List<string>()
+                    {
+                        "Something went wrong"
+                    }
+                };
 
-            return await _apiClient.PostAsync(url, requestContent);
+            }
+            else
+            {
+                string apiResponseAsString = await apiResponse.Content.ReadAsStringAsync();
+                return await DeserializeApiResponseAsync<AuthResultModel>(apiResponseAsString);
+            }
+
         }
 
         //Register
@@ -127,11 +143,28 @@ namespace SkillfullWebUI.Services
             };
             var requestContent = new FormUrlEncodedContent(values);
 
-             return await _apiClient.PostAsync(url, requestContent);
+            return await _apiClient.PostAsync(url, requestContent);
         }
         //RefreshTOken --> not available to user directly
+        public async Task<AuthResultModel> RefreshToken(string token, string refreshToken)
+        {
+            string url = "https://localhost:7071/api/Auth/RefreshToken";
+            var values = new Dictionary<string, string>()
+            { {"Token", token},
+            {"RefreshToken", refreshToken} };
+            var requestContent = new FormUrlEncodedContent(values);
+            var apiResponse = await _apiClient.PostAsync(url, requestContent);
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                var apiResponseAsString = await apiResponse.Content.ReadAsStringAsync();
+                return await DeserializeApiResponseAsync<AuthResultModel>(apiResponseAsString);
+            }
+            else
+            {
+                return null;
+            }
+        }
 
-       
         //Resend Email confirmation
         public async Task<HttpResponseMessage> ResendEmailConfirmation(ResendEmailConfirmationModel resendEmailConfirmation)
         {
@@ -147,7 +180,25 @@ namespace SkillfullWebUI.Services
         }
 
         //Reset password
+        public async Task<HttpResponseMessage> ForgotPassword(string email)
+        {
+            var values = new Dictionary<string, string>(){{ "Email", email }};
+            var requestContent = new FormUrlEncodedContent(values);
+            string url = "https://localhost:7071/api/Auth/ForgotPassword";
+            return await _apiClient.PostAsync(url, requestContent);
+        }
 
+        public async Task<HttpResponseMessage> ResetPassword(ResetPasswordModel resetPassword)
+        {
+            string url = "https://localhost:7071/api/Auth/ResetPassword";
+            var values = new Dictionary<string, string>()
+            { { "passwordResetToken", resetPassword.PasswordResetToken },
+              { "userId", resetPassword.UserId },
+              { "newPassword", HttpUtility.UrlEncode(resetPassword.Password) }
+            };
+            var requestContent = new FormUrlEncodedContent(values);
+            return await _apiClient.PostAsync(url, requestContent);
+        }
 
         private async Task<T> DeserializeApiResponseAsync<T>(string responseJson)
         {

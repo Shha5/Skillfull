@@ -53,9 +53,9 @@ namespace SkillfullAPI.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("ForgotPassword")]
-        public async Task<IActionResult> ForgotPassword(string email)
+        public async Task<IActionResult> ForgotPassword([FromForm]string email)
         {
             if (string.IsNullOrEmpty(email))
             {
@@ -68,7 +68,7 @@ namespace SkillfullAPI.Controllers
                     }
                 });
             }
-            var user = await _userManager.FindByNameAsync(email);
+            var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
                 return BadRequest(new AuthResultModel() { Result = false, Errors = new List<string>() { "Invalid request" } });
@@ -76,7 +76,8 @@ namespace SkillfullAPI.Controllers
             else
             {
                 var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var callbackUrl = Url.Action("ResetPassword", "Auth", new { userId = user.Id, passwordResetToken = passwordResetToken }, protocol: HttpContext.Request.Scheme); //change to redirect to mvc app view 
+                var encodedPasswordResetToken = HttpUtility.UrlEncode(passwordResetToken);
+                var callbackUrl = string.Concat("https://localhost:7154/Auth/ResetPassword?", "userId=", user.Id, "&passwordResetToken=", encodedPasswordResetToken); //change to redirect to mvc app view 
                 string subject = "Password reset for your Skillfull account";
                 string message = "You can reset your password by clicking this" + "<a href=\"" + callbackUrl + "\"> link</a>";
 
@@ -117,27 +118,32 @@ namespace SkillfullAPI.Controllers
                 }
                 var jwtToken = await _jwtTokenGenerationService.GenerateJwtToken(user);
 
-                
 
-                Response.Cookies.Append("token", jwtToken.Token, new CookieOptions 
+                //Response.Cookies.Append("token", jwtToken.Token, new CookieOptions
+                //{
+                //    Domain = "localhost",
+                //    HttpOnly = true,
+                //    Expires = DateTime.UtcNow.AddDays(2),
+                //    IsEssential = true,
+                //});
+
+                //Response.Cookies.Append("refreshToken", jwtToken.RefreshToken, new CookieOptions
+                //{
+                //    Domain = "localhost",
+                //    HttpOnly = true,
+                //    Expires = DateTime.UtcNow.AddDays(20),
+                //    IsEssential = true,
+                //});
+
+
+                return Ok(new AuthResultModel()
                 {
-                   
-                    Secure = true,
-                    HttpOnly = true,
-                    Expires = DateTime.UtcNow.AddDays(2),
-                    IsEssential = true,
-                    SameSite = SameSiteMode.None
-            });
-                Response.Cookies.Append("refreshToken", jwtToken.RefreshToken, new CookieOptions
-                {
-                    
-                    Secure = true,
-                    HttpOnly = true,
-                    Expires = DateTime.UtcNow.AddDays(20),
-                    IsEssential = true,
-                    SameSite = SameSiteMode.None
-                }); 
-                return Ok();
+                    Token = jwtToken.Token,
+                    RefreshToken = jwtToken.RefreshToken,
+                    Result = true,
+                    Username = user.UserName,
+                    Email = user.Email
+                });
             }
             return BadRequest(new AuthResultModel()
             {
@@ -235,7 +241,7 @@ namespace SkillfullAPI.Controllers
 
         [HttpPost]
         [Route("ResendEmailConfirmation")]
-        public async Task<IActionResult> ResendEmailConfirmation([FromForm]string email, [FromForm]string password)
+        public async Task<IActionResult> ResendEmailConfirmation([FromForm] string email, [FromForm] string password)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
@@ -295,7 +301,7 @@ namespace SkillfullAPI.Controllers
 
         [HttpPost]
         [Route("ResetPassword")]
-        public async Task<IActionResult> ResetPassword(string userId, string passwordResetToken, string newPassword)
+        public async Task<IActionResult> ResetPassword([FromForm] string userId, [FromForm] string passwordResetToken, [FromForm] string newPassword)
         {
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(passwordResetToken) || string.IsNullOrEmpty(newPassword))
             {

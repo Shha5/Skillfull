@@ -9,6 +9,8 @@ namespace SkillfullWebUI.Services.Interfaces
         Task<HttpResponseMessage> Register(RegistrationRequestModel registrationRequest);
         Task<HttpResponseMessage> ConfirmEmail(EmailConfirmationModel emailConfirmation);
         Task<HttpResponseMessage> ResendEmailConfirmation(ResendEmailConfirmationModel resendEmailConfirmation);
-        Task<HttpResponseMessage> Login(LoginModel login);
+        Task<AuthResultModel> Login(LoginModel login);
+        Task<HttpResponseMessage> ForgotPassword(string email);
+        Task<HttpResponseMessage> ResetPassword(ResetPasswordModel resetPassword);
     }
 }
