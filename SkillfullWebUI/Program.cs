@@ -6,6 +6,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddHttpClient<IApiService, ApiService>(client =>
     client.BaseAddress = new Uri("https://localhost:7071"));
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.CheckConsentNeeded = context => true;
+    options.ConsentCookieValue = "true";
+});
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -20,6 +25,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseCookiePolicy();
 
 app.UseRouting();
 

@@ -131,33 +131,50 @@ namespace SkillfullWebUI.Controllers
                     {
                         Domain = "localhost",
                         HttpOnly = true,
-                        Expires = DateTime.UtcNow.AddDays(2),
+                        Expires = DateTime.UtcNow.AddMinutes(20),
                         IsEssential = true,
+                        Secure = true
                     });
-
-                    Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+                    
+                    if(login.RememberMe == true)
                     {
-                        Domain = "localhost",
-                        HttpOnly = true,
-                        Expires = DateTime.UtcNow.AddDays(20),
-                        IsEssential = true,
-                    });
+                        Response.Cookies.Append("RememberMe", "true", new CookieOptions
+                        {
+                            Domain = "localhost",
+                            HttpOnly = false,
+                            Expires = DateTime.UtcNow.AddDays(30),
+                            IsEssential = true,
+                        });
 
-                    Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+                        Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+                        {
+                            Domain = "localhost",
+                            HttpOnly = true,
+                            Expires = DateTime.UtcNow.AddDays(30),
+                            IsEssential = true,
+                            Secure = true
+                        });
+                    }
+                    else
                     {
-                        Domain = "localhost",
-                        HttpOnly = true,
-                        Expires = DateTime.UtcNow.AddDays(20),
-                        IsEssential = true,
-                    });
-
-                    if (result.Username != null)
+                        Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+                        {
+                            Domain = "localhost",
+                            HttpOnly = true,
+                            Expires = DateTime.UtcNow.AddHours(3),
+                            IsEssential = true,
+                            Secure = true
+                        });
+                    }
+                  
+                    if (result.Username != null && HttpContext.Request.Cookies.ContainsKey(".AspNet.Consent"))
                     {
                         Response.Cookies.Append("Username", result.Username, new CookieOptions
                         {
                             Domain = "localhost",
                             HttpOnly = true,
                             Expires = DateTime.UtcNow.AddDays(20),
+                            Secure = true
                         });
                     }
                     return LocalRedirect(returnUrl);
@@ -167,7 +184,7 @@ namespace SkillfullWebUI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ForgotPassword()
+        public IActionResult ForgotPassword()
         {
             ForgotPasswordModel forgotPassword = new ForgotPasswordModel();
             return View();
@@ -225,6 +242,24 @@ namespace SkillfullWebUI.Controllers
                 ViewBag.ErrorMessage = "Please verify that your new password meet the criteria";
                 return View();
             }
+        }
+
+        public IActionResult Logout()
+        {
+            if(HttpContext.Request.Cookies.ContainsKey("refreshToken"))
+            {
+                HttpContext.Response.Cookies.Delete("refreshToken");
+                if (HttpContext.Request.Cookies.ContainsKey("token"))
+                {
+                    HttpContext.Response.Cookies.Delete("token");
+                }
+                if (HttpContext.Request.Cookies.ContainsKey("Username"))
+                {
+                    HttpContext.Response.Cookies.Delete("Username");
+                }
+                return RedirectToAction("Index","Home");
+            }
+            return RedirectToAction("Index", "Home");
         }
     }
 

@@ -21,16 +21,17 @@
             <span asp-validation-for="Password" class="text-danger"></span>
         </div>
     </div>
-  @*  <div class="form-group">
+    <div class="form-group">
         <div class="col-md-10">
             <div class="custom-checkbox">
                 <label asp-for="RememberMe">
                     <input asp-for="RememberMe" />
                     @Html.DisplayNameFor(m => m.RememberMe)
                 </label>
+                <span><img class="tooltip-icon" src="~/assets/information.png" data-bs-toggle="tooltip" data-bs-placement="right" title="Clicking this will enable you to be logged in for 30 days. Otherwise, your session will last for 3 hours, after that time you will be asked to log in again. We advise against using this option if you are using a device which is not available to you only." /></span>
             </div>
         </div>
-    </div>*@
+    </div>
     <div class="form-group">
         <div class="offset-md-2 col-md-10">
             <button type="submit" class="btn btn-success">Log in</button>

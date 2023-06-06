@@ -26,7 +26,6 @@ namespace SkillfullAPI.Controllers
 
         [HttpPost]
         [Route("ConfirmEmail")]
-       
         public async Task<IActionResult> ConfirmEmail(string userId, string emailConfirmationToken)
         {
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(emailConfirmationToken))
@@ -41,7 +40,6 @@ namespace SkillfullAPI.Controllers
                 });
             }
             var user = await _userManager.FindByIdAsync(userId);
-            //var token = HttpUtility.UrlDecode(emailConfirmationToken);
             var result = await _userManager.ConfirmEmailAsync(user, emailConfirmationToken);
             if (result.Succeeded)
             {
