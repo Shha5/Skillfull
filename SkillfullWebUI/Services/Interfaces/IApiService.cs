@@ -12,5 +12,6 @@ namespace SkillfullWebUI.Services.Interfaces
         Task<AuthResultModel> Login(LoginModel login);
         Task<HttpResponseMessage> ForgotPassword(string email);
         Task<HttpResponseMessage> ResetPassword(ResetPasswordModel resetPassword);
+        Task<HttpResponseMessage> ChangePassword(ChangePasswordModel changePassword, string userId);
     }
 }

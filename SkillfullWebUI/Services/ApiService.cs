@@ -200,6 +200,17 @@ namespace SkillfullWebUI.Services
             return await _apiClient.PostAsync(url, requestContent);
         }
 
+        public async Task<HttpResponseMessage> ChangePassword(ChangePasswordModel changePassword, string userId)
+        {
+            string url = "https://localhost:7071/api/Auth/ChangePassword";
+            var values = new Dictionary<string, string>()
+            { { "UserId", userId },
+              { "CurrentPassword", changePassword.Password },
+              {"NewPassword", changePassword.NewPassword } };
+            var requestContent = new FormUrlEncodedContent(values);
+            return await _apiClient.PostAsync(url,requestContent);
+
+        }
         private async Task<T> DeserializeApiResponseAsync<T>(string responseJson)
         {
             if (!string.IsNullOrEmpty(responseJson))

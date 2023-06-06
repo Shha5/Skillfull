@@ -52,6 +52,44 @@ namespace SkillfullAPI.Controllers
         }
 
         [HttpPost]
+        [Route("ChangePassword")]
+        public async Task<IActionResult> ChangePassword([FromForm] PasswordChangeRequestDto passwordChangeRequest)
+        {
+            if(ModelState.IsValid) 
+            {
+                var user = await _userManager.FindByIdAsync(passwordChangeRequest.UserId);
+                
+                   var result = await _userManager.ChangePasswordAsync(user, passwordChangeRequest.CurrentPassword, passwordChangeRequest.NewPassword);
+                    if (result.Succeeded)
+                    {
+                        return Ok();
+                    }
+                    else
+                    {
+                        return BadRequest(new AuthResultModel()
+                        {
+                            Result = false,
+                            Errors = new List<string>()
+                            {
+                                result.Errors.ToString()
+                            }
+                        });
+                    }  
+            }
+            else
+            {
+                return BadRequest(new AuthResultModel()
+                {
+                    Result = false,
+                    Errors = new List<string>()
+                    {
+                        "Data provided is not complete"
+                    }
+                });
+            }
+        }
+
+        [HttpPost]
         [Route("ForgotPassword")]
         public async Task<IActionResult> ForgotPassword([FromForm]string email)
         {
@@ -105,7 +143,7 @@ namespace SkillfullAPI.Controllers
                 var isCorrect = await _userManager.CheckPasswordAsync(user, loginRequest.Password);
                 if (isCorrect == false)
                 {
-                    BadRequest(new AuthResultModel()
+                    return BadRequest(new AuthResultModel()
                     {
                         Result = false,
                         Errors = new List<string>()
@@ -116,31 +154,13 @@ namespace SkillfullAPI.Controllers
                 }
                 var jwtToken = await _jwtTokenGenerationService.GenerateJwtToken(user);
 
-
-                //Response.Cookies.Append("token", jwtToken.Token, new CookieOptions
-                //{
-                //    Domain = "localhost",
-                //    HttpOnly = true,
-                //    Expires = DateTime.UtcNow.AddDays(2),
-                //    IsEssential = true,
-                //});
-
-                //Response.Cookies.Append("refreshToken", jwtToken.RefreshToken, new CookieOptions
-                //{
-                //    Domain = "localhost",
-                //    HttpOnly = true,
-                //    Expires = DateTime.UtcNow.AddDays(20),
-                //    IsEssential = true,
-                //});
-
-
                 return Ok(new AuthResultModel()
                 {
                     Token = jwtToken.Token,
                     RefreshToken = jwtToken.RefreshToken,
                     Result = true,
                     Username = user.UserName,
-                    Email = user.Email
+                    UserId = user.Id
                 });
             }
             return BadRequest(new AuthResultModel()

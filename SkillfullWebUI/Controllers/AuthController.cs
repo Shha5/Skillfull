@@ -43,6 +43,44 @@ namespace SkillfullWebUI.Controllers
         }
 
         [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            if (HttpContext.Request.Cookies.ContainsKey("userId"))
+            {
+                ChangePasswordModel changePassword = new ChangePasswordModel();
+                return View();
+            }
+            else
+            {
+                return View("Error");
+            }    
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordModel changePassword)
+        {
+            if (ModelState.IsValid)
+            {
+                string userId = HttpContext.Request.Cookies["UserId"];
+                var result = await _apiService.ChangePassword(changePassword, userId);
+                if (result.IsSuccessStatusCode)
+                {
+                    return View("ChangePasswordSuccess");
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = "Something went wrong";
+                    return View();
+                }
+            }
+            else
+            {
+                ViewBag.ErrorMessage = "Please provide all the necessary data";
+                return View();
+            }
+        }
+
+        [HttpGet]
         public IActionResult ConfirmEmail(string emailConfirmationToken = null, string userId = null)
         {
             if (emailConfirmationToken == null || userId == null)
@@ -136,7 +174,8 @@ namespace SkillfullWebUI.Controllers
                         Secure = true
                     });
                     
-                    if(login.RememberMe == true)
+
+                    if (login.RememberMe == true)
                     {
                         Response.Cookies.Append("RememberMe", "true", new CookieOptions
                         {
@@ -154,10 +193,26 @@ namespace SkillfullWebUI.Controllers
                             IsEssential = true,
                             Secure = true
                         });
+                        Response.Cookies.Append("UserId", result.UserId, new CookieOptions
+                        {
+                            Domain = "localhost",
+                            HttpOnly = true,
+                            Expires = DateTime.UtcNow.AddDays(30),
+                            IsEssential = true,
+                            Secure = true
+                        });
                     }
                     else
                     {
                         Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+                        {
+                            Domain = "localhost",
+                            HttpOnly = true,
+                            Expires = DateTime.UtcNow.AddHours(3),
+                            IsEssential = true,
+                            Secure = true
+                        });
+                        Response.Cookies.Append("UserId", result.UserId, new CookieOptions
                         {
                             Domain = "localhost",
                             HttpOnly = true,
