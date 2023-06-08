@@ -261,19 +261,64 @@ namespace SkillfullWebUI.Services
                 string apiResponseAsString = await apiResponse.Content.ReadAsStringAsync();
                 if (string.IsNullOrEmpty(apiResponseAsString))
                 {
-                    return null;
+                    return new List<UserSkillModel>();
                 }
                 return await DeserializeApiResponseAsync<List<UserSkillModel>>(apiResponseAsString);
             }
+            
             return null;
         }
 
         //update userskill
 
-        //Delete userskill
+        public async Task<HttpResponseMessage> UpdateUserSkill(string userSkillId, string newSkillAssessmentId)
+        {
+            string url = "https://localhost:7071/api/UserSkills/updateUserSkill";
+            var values = new Dictionary<string, string>()
+            { 
+                {"userSkillId", userSkillId },
+                {"newSkillAssessmentId", newSkillAssessmentId}
+            };
 
+            var requestContent = new FormUrlEncodedContent(values);
+
+            return await _apiClient.PostAsync(url, requestContent);
+        }
+
+        //Delete userskill
+        public async Task<HttpResponseMessage> DeleteUserSkill(string userSkillId)
+        {
+            string url = "https://localhost:7071/api/UserSkills/deleteUserSkill";
+            var values = new Dictionary<string, string>()
+            {
+                {"userSkillId", userSkillId }
+            };
+
+            var requestContent = new FormUrlEncodedContent(values);
+
+            return await _apiClient.PostAsync(url, requestContent);
+        }
 
         //Add task 
+
+        public async Task<HttpResponseMessage> AddUserSkillTask(AddUserSkillTaskModel addUserSkillTask, string userId)
+        {
+            string url = "https://localhost:7071/api/UserSkills/addUserSkillTask";
+            var values = new Dictionary<string, string>()
+            {
+                
+                {"userId", userId},
+                {"TaskName", addUserSkillTask.TaskName },
+                { "TaskDescription", addUserSkillTask.TaskDescription },
+                { "TaskStatusId", addUserSkillTask.TaskStatusId},
+                {"UserSkillId", addUserSkillTask.UserSkillId },
+                {"UserSkillName", addUserSkillTask.UserSkillName }
+            };
+
+            var requestContent = new FormUrlEncodedContent(values);
+
+            return await _apiClient.PostAsync(url,requestContent);
+        }
 
         //Get all user tasks
 

@@ -2,7 +2,7 @@
 {
     public class UserSkillModel
     {
-        public int Id { get; set; }
+        public string UserSkillId { get; set; }
         public string SkillName { get; set; }
         public string SkillAssessmentId { get; set; }
     }

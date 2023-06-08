@@ -4,9 +4,8 @@ AS
 BEGIN
 SET NOCOUNT ON
 	SELECT [UserSkillTasks].[Id], [UserSkillTasks].[Name], [UserSkillTasks].[Description], [UserSkillTasks].[StatusId], [UserSkillTasks].[CreatedDate], [UserSkillTasks].[ModifiedDate],
-	 [UserSkillTasks].[UserSkillId]
+	 [UserSkillTasks].[UserSkillId], [UserSkillTasks].[UserSkillName]
 FROM UserSkillTasks
 
 
-WHERE [UserSkillTasks].[UserId] = @userId
 END

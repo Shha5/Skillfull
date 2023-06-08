@@ -1,7 +1,22 @@
 ﻿@using SkillfullWebUI.Models.UserSkillsModels;
 @model List<UserSkillModel>
 
-    @foreach(var skill in Model){
-        <h3>@skill.SkillName</h3>
-        <h2>@skill.SkillAssessmentId</h2>
+    @ViewBag.InfoMessage
+@if(Model != null)
+{
+    @foreach (var skill in Model)
+    {
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">@skill.SkillName</h4>
+                <p>Your assessment: @skill.SkillAssessmentId</p>
+                <span><img class="tooltip-icon" src="~/assets/information.png" data-bs-toggle="tooltip" data-bs-placement="right" title="1 - can't do shit; 2 - know a little; 3 - can do but with help; 4 - can do alone; 5 - can teach others'" /></span>
+
+                <a class="btn btn-primary" href="@Url.Action("UpdateUserSkill", "UserSkills", new {userSkillId = skill.UserSkillId, skillName = skill.SkillName})">Update</a>
+                <a class="btn btn-primary" href="@Url.Action("AddUserSkillTask", "UserSkills", new {userSkillId = skill.UserSkillId, userSkillName = skill.SkillName})">Add task</a>
+                <a class="btn btn-primary" href="@Url.Action("DeleteUserSkill", "UserSkills", new {userSkillId = skill.UserSkillId})">Delete</a>
+
+            </div>
+        </div>
     }
+}

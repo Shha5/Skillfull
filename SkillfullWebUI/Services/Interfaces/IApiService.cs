@@ -17,5 +17,8 @@ namespace SkillfullWebUI.Services.Interfaces
         Task<HttpResponseMessage> ChangePassword(ChangePasswordModel changePassword, string userId);
         Task<HttpResponseMessage> AddUserSkill(string userId, string skillId, string skillName, string skillAssessmentId);
         Task<List<UserSkillModel>> GetAllUserSkills(string userId);
+        Task<HttpResponseMessage> UpdateUserSkill(string userSkillId, string newSkillAssessmentId);
+        Task<HttpResponseMessage> DeleteUserSkill(string userSkillId);
+        Task<HttpResponseMessage> AddUserSkillTask(AddUserSkillTaskModel addUserSkillTask, string userId);
     }
 }

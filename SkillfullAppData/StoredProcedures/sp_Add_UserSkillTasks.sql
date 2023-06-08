@@ -2,13 +2,14 @@
 	@Name NVARCHAR(50),
 	@Description NVARCHAR(50) = NULL,
 	@StatusId INT = 1,
-	@userSkillId NVARCHAR(50),
-	@userId NVARCHAR(50)
+	@UserSkillId NVARCHAR(50),
+	@UserId NVARCHAR(50),
+	@UserSkillName NVARCHAR(150)
 
 AS
 BEGIN
-	INSERT INTO UserSkillTasks ([Name], [Description], [StatusId], [UserSkillId], [UserId])
-	VALUES (@Name, @Description, @StatusId, @userSkillId, @userId)
+	INSERT INTO UserSkillTasks ([Name], [Description], [StatusId], [UserSkillId], [UserId], [UserSkillName])
+	VALUES (@Name, @Description, @StatusId, @UserSkillId, @UserId, @UserSkillName)
 END
 
 

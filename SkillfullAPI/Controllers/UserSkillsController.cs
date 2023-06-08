@@ -60,6 +60,7 @@ namespace SkillfullAPI.Controllers
             {
                 userSkills.Add(new UserSkillModel()
                 {
+                    UserSkillId = item.Id,
                     SkillId = item.SkillId,
                     SkillName = item.SkillName,
                     SkillAssessmentId = item.SkillAssessmentId
@@ -70,19 +71,19 @@ namespace SkillfullAPI.Controllers
 
         [HttpPost]
         [Route("updateUserSkill")]
-        public async Task<IActionResult> UpdateUserSkill(int userSkillId, int newUserSkillAssessmentId)
+        public async Task<IActionResult> UpdateUserSkill([FromForm] int userSkillId,[FromForm] int newSkillAssessmentId)
         {
-            if (newUserSkillAssessmentId == null || newUserSkillAssessmentId <= 0 || newUserSkillAssessmentId > 5 || userSkillId == null)
+            if (newSkillAssessmentId == null || newSkillAssessmentId <= 0 || newSkillAssessmentId > 5 || userSkillId == null)
             {
                 return BadRequest("Request not valid");
             }
-            await _userSkillsData.UpdateUserSkillAssessment(userSkillId, newUserSkillAssessmentId);
+            await _userSkillsData.UpdateUserSkillAssessment(userSkillId, newSkillAssessmentId);
             return Ok("Successfully updated.");
         }
 
         [HttpPost]
         [Route("deleteUserSkill")]
-        public async Task<IActionResult> DeleteUserSkill(int userSkillId)
+        public async Task<IActionResult> DeleteUserSkill([FromForm]int userSkillId)
         {
             if(userSkillId == null)
             {
@@ -94,16 +95,17 @@ namespace SkillfullAPI.Controllers
 
         [HttpPost]
         [Route("addUserSkillTask")]
-        public async Task<IActionResult> AddUserSkillTask(string userId, UserSkillTaskModel userSkillTaskModel)
+        public async Task<IActionResult> AddUserSkillTask([FromForm] string userId, [FromForm] UserSkillTaskModel userSkillTaskModel)
         {
             if (ModelState.IsValid && !string.IsNullOrEmpty(userId))
             {
                 UserSkillTaskDataModel userSkillTask = new UserSkillTaskDataModel()
                 {
-                    Name = userSkillTaskModel.Name,
-                    Description = userSkillTaskModel.Description,
-                    StatusId = userSkillTaskModel.StatusId,
+                    Name = userSkillTaskModel.TaskName,
+                    Description = userSkillTaskModel.TaskDescription,
+                    StatusId = userSkillTaskModel.TaskStatusId,
                     UserSkillId = userSkillTaskModel.UserSkillId,
+                    UserSkillName = userSkillTaskModel.UserSkillName,
                     UserId = userId
                 };
                 try
@@ -140,11 +142,11 @@ namespace SkillfullAPI.Controllers
             {
                 userSkillTasks.Add(new UserSkillTaskModel()
                 {
-                    StatusId = item.StatusId,
-                    Name = item.Name,
-                    CreatedDate = item.CreatedDate,
-                    ModifiedDate = item.ModifiedDate,
-                    Description = item.Description,
+                    TaskStatusId = item.StatusId,
+                    TaskName = item.Name,
+                    TaskCreatedDate = item.CreatedDate,
+                    TaskModifiedDate = item.ModifiedDate,
+                    TaskDescription = item.Description,
                     UserSkillId= item.UserSkillId
 
                 });
@@ -161,9 +163,9 @@ namespace SkillfullAPI.Controllers
                 await _userSkillsData.UpdateUserSkillTasks(new UserSkillTaskDataModel
                 {
                     Id = userSkillTaskId,
-                    StatusId = userSkillTask.StatusId,
-                    Name = userSkillTask.Name,
-                    Description = userSkillTask.Description,
+                    StatusId = userSkillTask.TaskStatusId,
+                    Name = userSkillTask.TaskName,
+                    Description = userSkillTask.TaskDescription,
                     ModifiedDate = DateTime.UtcNow
                 });
                 return Ok("Updated successfully");
