@@ -56,5 +56,18 @@ namespace SkillfullWebUI.Controllers
             }
         }
 
+        public async Task<IActionResult> GetAllUserSkills()
+        {
+            if (HttpContext.Request.Cookies.ContainsKey("UserId"))
+            {
+                var result = await _apiService.GetAllUserSkills(HttpContext.Request.Cookies["UserId"]);
+                if(result.Count > 0)
+                {
+                    return View(result);
+                }
+                else { return View("Error"); }
+            } else { return View("Error"); }
+        }
+
     }
 }

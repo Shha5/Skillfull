@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using SkillfullWebUI.Models.AuthModels;
 using SkillfullWebUI.Models.SkillModels;
+using SkillfullWebUI.Models.UserSkillsModels;
 using SkillfullWebUI.Services.Interfaces;
 using System.Web;
 
@@ -249,6 +250,23 @@ namespace SkillfullWebUI.Services
         }
 
         //Get all userskills
+
+        public async Task<List<UserSkillModel>> GetAllUserSkills(string userId)
+        {
+            string url = "https://localhost:7071/api/UserSkills/getAllUserSkills";
+            string requestUri = string.Concat(url, "?userId=", userId);
+            var apiResponse = await _apiClient.GetAsync(requestUri);
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                string apiResponseAsString = await apiResponse.Content.ReadAsStringAsync();
+                if (string.IsNullOrEmpty(apiResponseAsString))
+                {
+                    return null;
+                }
+                return await DeserializeApiResponseAsync<List<UserSkillModel>>(apiResponseAsString);
+            }
+            return null;
+        }
 
         //update userskill
 

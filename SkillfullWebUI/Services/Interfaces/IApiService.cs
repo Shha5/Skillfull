@@ -1,5 +1,6 @@
 ﻿using SkillfullWebUI.Models.AuthModels;
 using SkillfullWebUI.Models.SkillModels;
+using SkillfullWebUI.Models.UserSkillsModels;
 
 namespace SkillfullWebUI.Services.Interfaces
 {
@@ -15,5 +16,6 @@ namespace SkillfullWebUI.Services.Interfaces
         Task<HttpResponseMessage> ResetPassword(ResetPasswordModel resetPassword);
         Task<HttpResponseMessage> ChangePassword(ChangePasswordModel changePassword, string userId);
         Task<HttpResponseMessage> AddUserSkill(string userId, string skillId, string skillName, string skillAssessmentId);
+        Task<List<UserSkillModel>> GetAllUserSkills(string userId);
     }
 }
