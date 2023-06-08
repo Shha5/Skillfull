@@ -1,7 +1,32 @@
 ﻿@using SkillfullWebUI.Models.SkillModels;
-@model List<SkillModel>;
+@using System.Net;
+@model List<SkillModel>
+
+<form asp-controller="Home" asp-action="GetAllSkills" method="get" role="form">
+    <input id="searchPhrase" name="searchPhrase" class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+</form>
 
 @foreach(SkillModel skill in Model)
 {
-    <h2>@skill.Name</h2>
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">@skill.Name</h4>
+
+            <a class="btn btn-primary" href="@Url.Action("GetSkillDetails", "Home", new {skillId = skill.Id})">Learn More</a>
+            @if (Context.Request.Cookies.ContainsKey("refreshToken"))
+            {
+                
+                <a class="btn btn-primary" href="@Url.Action("AddUserskill", "UserSkills", new {skillId = WebUtility.UrlEncode(skill.Id), skillName = WebUtility.UrlEncode(skill.Name)})">Add</a>
+            }
+            else
+            {
+                <a class="btn btn-primary" asp-controller="Auth" asp-action="Login">Login to add</a>
+            }
+
+        </div>
+    </div>
 }
+
+>
+

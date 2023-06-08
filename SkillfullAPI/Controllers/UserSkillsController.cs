@@ -2,6 +2,7 @@
 using SkillfullAPI.Models.AppModels;
 using DataAccessLibrary.Data.Interfaces;
 using DataAccessLibrary.Models;
+using System.Web;
 
 namespace SkillfullAPI.Controllers
 {
@@ -20,14 +21,14 @@ namespace SkillfullAPI.Controllers
 
         [HttpPost]
         [Route("addUserSkill")]
-        public async Task<IActionResult> AddUserSkill(UserSkillModel userSkillModel, string userId)
+        public async Task<IActionResult> AddUserSkill([FromForm] UserSkillModel userSkillModel, [FromForm] string userId)
         {
             if (ModelState.IsValid && !string.IsNullOrEmpty(userId))
             {
                 UserSkillDataModel userSkill = new UserSkillDataModel()
                 {
                     SkillId = userSkillModel.SkillId,
-                    SkillName = userSkillModel.SkillName,
+                    SkillName = HttpUtility.UrlDecode(userSkillModel.SkillName),
                     Id = null,
                     SkillAssessmentId = userSkillModel.SkillAssessmentId
                 };

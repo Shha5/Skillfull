@@ -1,12 +1,9 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SkillfullWebUI.Models.AuthModels;
 using SkillfullWebUI.Models.SkillModels;
 using SkillfullWebUI.Services.Interfaces;
 using System.Web;
-using static System.Net.WebRequestMethods;
+
 
 namespace SkillfullWebUI.Services
 {
@@ -64,9 +61,9 @@ namespace SkillfullWebUI.Services
             {
                 return null;
             }
-            SkillDetailsDataModel skillDetailsData = await DeserializeApiResponseAsync<SkillDetailsDataModel>(apiResponseString);
-            SkillDetailsModel skillDetails = skillDetailsData.Data.FirstOrDefault();
-            return skillDetails;
+            SkillDetailsDataModel skillDetails = await DeserializeApiResponseAsync<SkillDetailsDataModel>(apiResponseString);
+            
+            return skillDetails.Data;
         }
 
         private async Task<string> GetSkillDetailsApiResponse(string skillId)
@@ -200,6 +197,7 @@ namespace SkillfullWebUI.Services
             return await _apiClient.PostAsync(url, requestContent);
         }
 
+        //Change Password
         public async Task<HttpResponseMessage> ChangePassword(ChangePasswordModel changePassword, string userId)
         {
             string url = "https://localhost:7071/api/Auth/ChangePassword";
@@ -232,8 +230,40 @@ namespace SkillfullWebUI.Services
             }
         }
 
-        
+        //USERSKILLS
+        //Add userSkill
+        public async Task<HttpResponseMessage> AddUserSkill(string userId, string skillId, string skillName, string skillAssessmentId)
+        {
+            string url = "https://localhost:7071/api/UserSkills/addUserSkill";
+            var values = new Dictionary<string, string>()
+            {
+                {"UserId", userId },
+                {"SkillId", skillId },
+                {"SkillName", skillName},
+                {"SkillAssessmentId", skillAssessmentId}
+            };
 
-       
+            var requestContent = new FormUrlEncodedContent(values);
+
+            return await _apiClient.PostAsync(url, requestContent);
+        }
+
+        //Get all userskills
+
+        //update userskill
+
+        //Delete userskill
+
+
+        //Add task 
+
+        //Get all user tasks
+
+        //udate task
+
+        //delete task
+
+
+
     }
 }

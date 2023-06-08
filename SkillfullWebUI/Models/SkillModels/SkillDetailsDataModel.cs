@@ -2,6 +2,6 @@
 {
     public class SkillDetailsDataModel
     {
-        public SkillDetailsModel[] Data { get; set; }
+        public SkillDetailsModel Data { get; set; }
     }
 }
