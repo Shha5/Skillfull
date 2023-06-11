@@ -15,6 +15,7 @@
                 <a class="btn btn-primary" href="@Url.Action("UpdateUserSkill", "UserSkills", new {userSkillId = skill.UserSkillId, skillName = skill.SkillName})">Update</a>
                 <a class="btn btn-primary" href="@Url.Action("AddUserSkillTask", "UserSkills", new {userSkillId = skill.UserSkillId, userSkillName = skill.SkillName})">Add task</a>
                 <a class="btn btn-primary" href="@Url.Action("DeleteUserSkill", "UserSkills", new {userSkillId = skill.UserSkillId})">Delete</a>
+                <a class="btn btn-primary" href="@Url.Action("GetAllUserSkillTasks_Skill", "UserSkills", new {userSkillId = skill.UserSkillId, userSkillName = skill.SkillName})">Show tasks</a>
 
             </div>
         </div>

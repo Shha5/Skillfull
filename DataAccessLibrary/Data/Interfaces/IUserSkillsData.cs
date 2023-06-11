@@ -9,6 +9,7 @@ namespace DataAccessLibrary.Data.Interfaces
         Task AddUserSkillTask(string userSkillId, UserSkillTaskDataModel userSkillTask);
         List<UserSkillTaskDataModel> GetUserSkillTasks(string userSkillId);
         List<UserSkillTaskDataModel> GetUserSkillTasksPerUser(string userId);
+        List<UserSkillTaskDataModel> GetUserSkillTasksPerSkill(string userSkillId);
         Task UpdateUserSkillAssessment(int userSkillId, int skillAssessmentId);
         Task UpdateUserSkillTasks(UserSkillTaskDataModel userSkillTask);
         Task DeleteUserSkills(int userSkillId);

@@ -33,6 +33,11 @@ namespace DataAccessLibrary.Data
             return _sqlDataAccess.LoadData<UserSkillTaskDataModel, dynamic>("dbo.sp_GetAllForIdPerUser_UserSkillTasks", new { userId }).Result.ToList();
         }
 
+        public List<UserSkillTaskDataModel> GetUserSkillTasksPerSkill(string userSkillId)
+        {
+            return _sqlDataAccess.LoadData<UserSkillTaskDataModel, dynamic>("dbo.sp_GetAllForId_UserSkillTasks", new { userSkillId }).Result.ToList();
+        }
+
         public Task AddUserSkillTask(string userId, UserSkillTaskDataModel userSkillTask) =>
              _sqlDataAccess.SaveData("dbo.sp_Add_UserSkillTasks", new { userSkillTask.UserSkillId, userSkillTask.UserSkillName, userSkillTask.Name, userSkillTask.Description, userSkillTask.StatusId, userId });
 

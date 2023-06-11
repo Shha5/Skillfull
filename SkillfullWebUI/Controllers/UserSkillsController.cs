@@ -144,5 +144,36 @@ namespace SkillfullWebUI.Controllers
             }
             return View("Error");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllUserSkillTasks_User()
+        {
+            if (HttpContext.Request.Cookies.ContainsKey("UserId"))
+            {
+                var response = await _apiService.GetAllUserSkillTasks_User(HttpContext.Request.Cookies["UserId"]);
+                if(response.Count > 0 && response != null)
+                {
+                    return View(response);
+                }
+                return View("Error");
+            }
+            return View("Error");   
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllUserSkillTasks_Skill(string? userSkillId = null, string? userSkillName = null)
+        {
+            if (HttpContext.Request.Cookies.ContainsKey("UserId"))
+            {
+                var response = await _apiService.GetAllUserSkillTasks_Skill(userSkillId);
+                if (response.Count > 0 && response != null)
+                {
+                    ViewBag.InfoMessage = string.Concat("Tasks for", userSkillName);
+                    return View(response);
+                }
+                return View("Error");
+            }
+            return View("Error");
+        }
     }
 }

@@ -1,0 +1,11 @@
+﻿@using SkillfullWebUI.Models.UserSkillsModels;
+@model List<UserSkillTaskModel>
+
+    @ViewBag.InfoMessage
+
+@if(Model != null && Model.Count >0){
+    @foreach(var task in Model)
+    {
+        <h2>@task.TaskName</h2>
+    }
+}

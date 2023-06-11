@@ -154,6 +154,36 @@ namespace SkillfullAPI.Controllers
             return userSkillTasks;
         }
 
+        [HttpGet]
+        [Route("getAllUserSkillTasksPerSkill")]
+        public async Task<List<UserSkillTaskModel>> GetAllUserSkillTasksPerSkill(string userSkillId)
+        {
+            if (string.IsNullOrEmpty(userSkillId))
+            {
+                return null;
+            }
+            var result = _userSkillsData.GetUserSkillTasksPerSkill(userSkillId).ToList();
+            List<UserSkillTaskModel> userSkillTasks = new List<UserSkillTaskModel>();
+            if (result.Count == 0)
+            {
+                return null;
+            }
+            foreach (var item in result)
+            {
+                userSkillTasks.Add(new UserSkillTaskModel()
+                {
+                    TaskStatusId = item.StatusId,
+                    TaskName = item.Name,
+                    TaskCreatedDate = item.CreatedDate,
+                    TaskModifiedDate = item.ModifiedDate,
+                    TaskDescription = item.Description,
+                    UserSkillId = item.UserSkillId
+
+                });
+            }
+            return userSkillTasks;
+        }
+
         [HttpPost]
         [Route("updateUserSkillTask")]
         public async Task<IActionResult> UpdateUserSkillTask(UserSkillTaskModel userSkillTask, int userSkillTaskId)

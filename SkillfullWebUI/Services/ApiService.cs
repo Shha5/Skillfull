@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Newtonsoft.Json;
 using SkillfullWebUI.Models.AuthModels;
 using SkillfullWebUI.Models.SkillModels;
 using SkillfullWebUI.Models.UserSkillsModels;
@@ -321,6 +322,45 @@ namespace SkillfullWebUI.Services
         }
 
         //Get all user tasks
+
+        public async Task<List<UserSkillTaskModel>> GetAllUserSkillTasks_User(string userId)
+        {
+            string url = "https://localhost:7071/api/UserSkills/getAllUserSkillTasksPerUser";
+            var requestUri = string.Concat(url, "?userId=", userId);
+            var apiResponse = await _apiClient.GetAsync(requestUri);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                var apiResponseAsString = await apiResponse.Content.ReadAsStringAsync();
+                if (string.IsNullOrEmpty(apiResponseAsString))
+                {
+                    return null;
+                }
+                var deserializedResponse = await DeserializeApiResponseAsync<List<UserSkillTaskModel>>(apiResponseAsString);
+                return deserializedResponse;
+            }
+            return null;
+        }
+
+
+        public async Task<List<UserSkillTaskModel>> GetAllUserSkillTasks_Skill(string userSkillId)
+        {
+            string url = "https://localhost:7071/api/UserSkills/getAllUserSkillTasksPerSkill";
+            var requestUri = string.Concat(url, "?userSkillId=", userSkillId);
+            var apiResponse = await _apiClient.GetAsync(requestUri);
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                var apiResponseAsString = await apiResponse.Content.ReadAsStringAsync();
+                if (string.IsNullOrEmpty(apiResponseAsString))
+                {
+                    return null;
+                }
+                var deserializedResponse = await DeserializeApiResponseAsync<List<UserSkillTaskModel>>(apiResponseAsString);
+                return deserializedResponse;
+            }
+            return null;
+        }
 
         //udate task
 
