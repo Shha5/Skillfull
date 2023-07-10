@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[sp_Add_UserSkillTasks]
+﻿CREATE PROCEDURE [dbo].[sp_Add_Tasks]
 	@Name NVARCHAR(50),
 	@Description NVARCHAR(50) = NULL,
 	@StatusId INT = 1,
@@ -8,7 +8,7 @@
 
 AS
 BEGIN
-	INSERT INTO UserSkillTasks ([Name], [Description], [StatusId], [UserSkillId], [UserId], [UserSkillName])
+	INSERT INTO [Tasks] ([Name], [Description], [StatusId], [UserSkillId], [UserId], [UserSkillName])
 	VALUES (@Name, @Description, @StatusId, @UserSkillId, @UserId, @UserSkillName)
 END
 

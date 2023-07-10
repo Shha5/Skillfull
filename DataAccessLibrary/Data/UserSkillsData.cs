@@ -14,45 +14,42 @@ namespace DataAccessLibrary.Data
             _sqlDataAccess = sqlDataAccess;
         }
 
-        public List<UserSkillDataModel> GetUserSkills(string userId)
-        {
-            return _sqlDataAccess.LoadData<UserSkillDataModel, dynamic>("dbo.sp_GetAllForId_UserSkills", new { userId }).Result.ToList();
-        }
-
-
         public Task AddUserSkill(string userId, UserSkillDataModel userSkill) =>
              _sqlDataAccess.SaveData("dbo.sp_Add_UserSkills", new { userId, userSkill.SkillName, userSkill.SkillId, userSkill.SkillAssessmentId });
+        public Task AddTask(string userId, TaskDataModel task) =>
+             _sqlDataAccess.SaveData("dbo.sp_Add_Tasks", new { task.UserSkillId, task.UserSkillName, task.Name, task.Description, task.StatusId, userId });
 
-        public List<UserSkillTaskDataModel> GetUserSkillTasks(string userSkillId)
+        public Task DeleteUserSkill(int userSkillId) =>
+            _sqlDataAccess.SaveData("dbo.sp_Delete_UserSkills", new { userSkillId });
+
+        public Task DeleteTask(int taskId) =>
+            _sqlDataAccess.SaveData("dbo.sp_Delete_Tasks", new { taskId });
+
+        public List<UserSkillDataModel> GetUserSkills(string userId)
         {
-            return _sqlDataAccess.LoadData<UserSkillTaskDataModel, dynamic>("dbo.sp_GetAllForId_UserSkillTasks", new { userSkillId }).Result.ToList();
+            return _sqlDataAccess.LoadData<UserSkillDataModel, dynamic>("dbo.sp_GetAllByUserId_UserSkills", new { userId }).Result.ToList();
         }
 
-        public List<UserSkillTaskDataModel> GetUserSkillTasksPerUser(string userId)
+        public List<TaskDataModel> GetTasksByUserId(string userId)
         {
-            return _sqlDataAccess.LoadData<UserSkillTaskDataModel, dynamic>("dbo.sp_GetAllForIdPerUser_UserSkillTasks", new { userId }).Result.ToList();
+            return _sqlDataAccess.LoadData<TaskDataModel, dynamic>("dbo.sp_GetAllByUserId_Tasks", new { userId }).Result.ToList();
         }
 
-        public List<UserSkillTaskDataModel> GetUserSkillTasksPerSkill(string userSkillId)
+        public List<TaskDataModel> GetTasksForUserSkillId(string userSkillId)
         {
-            return _sqlDataAccess.LoadData<UserSkillTaskDataModel, dynamic>("dbo.sp_GetAllForId_UserSkillTasks", new { userSkillId }).Result.ToList();
+            return _sqlDataAccess.LoadData<TaskDataModel, dynamic>("dbo.sp_GetAllByUserSkillId_Tasks", new { userSkillId }).Result.ToList();
         }
 
-        public Task AddUserSkillTask(string userId, UserSkillTaskDataModel userSkillTask) =>
-             _sqlDataAccess.SaveData("dbo.sp_Add_UserSkillTasks", new { userSkillTask.UserSkillId, userSkillTask.UserSkillName, userSkillTask.Name, userSkillTask.Description, userSkillTask.StatusId, userId });
+        public Task ModifyTask(TaskDataModel task) =>
+    _sqlDataAccess.SaveData("dbo.sp_Modify_Tasks", new { task.Id, task.Name, task.Description, task.StatusId });
 
 
         public Task UpdateUserSkillAssessment(int userSkillId, int skillAssessmentId) =>
             _sqlDataAccess.SaveData("dbo.sp_Update_UserSkills", new { userSkillId, skillAssessmentId });
 
-        public Task UpdateUserSkillTasks(UserSkillTaskDataModel userSkillTask) =>
-            _sqlDataAccess.SaveData("dbo.sp_Update_UserSkillTasks", new { userSkillTask.Id, userSkillTask.Name, userSkillTask.Description, userSkillTask.StatusId });
 
-        public Task DeleteUserSkills(int userSkillId) =>
-            _sqlDataAccess.SaveData("dbo.sp_Delete_UserSkills", new { userSkillId });
 
-        public Task DeleteUserSkillTasks(int userSkillTaskId) =>
-            _sqlDataAccess.SaveData("dbo.sp_Delete_UserSkillTasks", new { userSkillTaskId });
+        
 
     }
 }

@@ -1,9 +1,12 @@
 ﻿@using SkillfullWebUI.Models.UserSkillsModels;
+
 @model List<UserSkillModel>
 
     @ViewBag.InfoMessage
 @if(Model != null)
 {
+    <div class="container-lg d-flex align-content-lg-stretch g-3">
+    <div class="col">
     @foreach (var skill in Model)
     {
         <div class="card">
@@ -20,4 +23,69 @@
             </div>
         </div>
     }
+    </div>
+    <div class="container-md col">
+    <canvas id="radarChart"></canvas>
+    </div>
+    </div>
+
 }
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('radarChart');
+    let SkillNames = [];
+    let SkillAssessments = [];
+
+    @if (Model != null && Model.Count > 0)
+    {
+        @foreach(var skill in Model)
+        {
+            @:SkillNames.push("@skill.SkillName");
+            @:SkillAssessments.push(@skill.SkillAssessmentId);
+        }
+    }
+        const data = {
+            labels: SkillNames,
+            datasets: [{
+                label: "Skill Assessments",
+                data: SkillAssessments,
+                fill: true,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgb(255, 99, 132)',
+                pointBackgroundColor: 'rgb(255, 99, 132)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(255, 99, 132)'
+            }]
+        }
+        const config = {
+        type: 'radar',
+        data: data,
+        options: {
+            elements: {
+                line: {
+                    borderWidth: 3
+                }
+            },
+            scales: {
+                r: {
+                    beginAtZero: false,
+                    min: 1,
+                    max: 5,
+                    suggestedMin: 1,
+                    suggestedMax: 5,
+                    stepSize: 1,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        },
+    };
+
+    new Chart(ctx, config);
+</script>

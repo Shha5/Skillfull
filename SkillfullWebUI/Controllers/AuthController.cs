@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
+using SkillfullWebUI.Constants;
 using SkillfullWebUI.Models.AuthModels;
 using SkillfullWebUI.Services.Interfaces;
 
@@ -8,11 +8,13 @@ namespace SkillfullWebUI.Controllers
     public class AuthController : Controller
     {
         private readonly IApiService _apiService;
+        private readonly ICookieManagerService _cookieManager;
        
 
-        public AuthController(IApiService apiService)
+        public AuthController(IApiService apiService, ICookieManagerService cookieManager)
         {
             _apiService = apiService;
+            _cookieManager = cookieManager;
         }
 
         [HttpGet]
@@ -28,7 +30,7 @@ namespace SkillfullWebUI.Controllers
             if (ModelState.IsValid)
             {
                var result = await _apiService.Register(registrationRequest);
-                if(result.IsSuccessStatusCode)
+                if (result.Result == true)
                 {
                     return View("RegistrationSuccess");
                 }
@@ -38,22 +40,22 @@ namespace SkillfullWebUI.Controllers
                     return View("Register");
                 }
             }
-            
             return View("Register");
         }
 
         [HttpGet]
         public IActionResult ChangePassword()
         {
-            if (HttpContext.Request.Cookies.ContainsKey("userId"))
+            if (_cookieManager.AreAuthCookiesPresent() == true)
             {
                 ChangePasswordModel changePassword = new ChangePasswordModel();
                 return View();
             }
             else
             {
-                return View("Error");
-            }    
+                return RedirectToAction("Login");
+            }
+               
         }
 
         [HttpPost]
@@ -61,23 +63,29 @@ namespace SkillfullWebUI.Controllers
         {
             if (ModelState.IsValid)
             {
-                string userId = HttpContext.Request.Cookies["UserId"];
-                var result = await _apiService.ChangePassword(changePassword, userId);
-                if (result.IsSuccessStatusCode)
+                if (_cookieManager.AreAuthCookiesPresent())
                 {
-                    return View("ChangePasswordSuccess");
+                  
+                    var result = await _apiService.ChangePassword(changePassword);
+                    if (result.Result == true)
+                    {
+                        return View("ChangePasswordSuccess");
+                    }
+                    else
+                    {
+                        ViewBag.ErrorMessage = result.ErrorMessage;
+                        return View();
+                    }
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = "Something went wrong";
-                    return View();
-                }
+                    ViewBag.ErrorMessage = "You must be logged in to change the password. If you forgot your password, please click the \"Forgot password?\" link below the login form.";
+                    RedirectToAction("Login");
+                }  
             }
-            else
-            {
-                ViewBag.ErrorMessage = "Please provide all the necessary data";
-                return View();
-            }
+            ViewBag.ErrorMessage = "Please provide all the necessary data";
+            return View();
+           
         }
 
         [HttpGet]
@@ -87,7 +95,8 @@ namespace SkillfullWebUI.Controllers
             {
                 return View("Error");
             }
-            return View();
+            EmailConfirmationModel emailConfirmation = new EmailConfirmationModel();
+            return View(emailConfirmation);
         }
 
         [HttpPost]
@@ -96,7 +105,7 @@ namespace SkillfullWebUI.Controllers
             if(ModelState.IsValid)
             {
                 var result = await _apiService.ConfirmEmail(emailConfirmation);
-                if (result.IsSuccessStatusCode)
+                if (result.Result == true)
                 {
                     return View("EmailConfirmationSuccess");
                 }
@@ -117,7 +126,7 @@ namespace SkillfullWebUI.Controllers
         public IActionResult ResendEmailConfirmation()
         {
             ResendEmailConfirmationModel resendEmailConfirmation = new ResendEmailConfirmationModel();
-            return View();
+            return View(resendEmailConfirmation);
         }
 
         [HttpPost]
@@ -127,7 +136,7 @@ namespace SkillfullWebUI.Controllers
             {
                 var result = await _apiService.ResendEmailConfirmation(resendEmailConfirmation);
                 
-                if(result.IsSuccessStatusCode) 
+                if(result.Result == true) 
                 {
                     return View("ResendEmailConfirmationSuccess");
                 }
@@ -141,99 +150,33 @@ namespace SkillfullWebUI.Controllers
             return View();
         }
 
-        [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
+        public IActionResult Login()
         {
             LoginModel login = new LoginModel();
-            login.ReturnUrl = returnUrl ?? Url.Content("~/");
             return View(login);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginModel login, string? returnUrl)
+        public async Task<IActionResult> Login(LoginModel login, string? returnUrl = null)
         {
             if (ModelState.IsValid)
             {
-                login.ReturnUrl = returnUrl;
-                returnUrl = returnUrl ?? Url.Content("~/");
-            
-                var result = await _apiService.Login(login);
-                if(result == null)
+                if (string.IsNullOrEmpty(returnUrl))
                 {
-
-                    return View();
+                    returnUrl = "~/";
                 }
+                else
+                {
+                    returnUrl = string.Concat("~/", returnUrl.Remove(0, 23));
+                }
+                var result = await _apiService.Login(login);
+          
                 if(result.Result == true)
                 {
-                    Response.Cookies.Append("token", result.Token, new CookieOptions
-                    {
-                        Domain = "localhost",
-                        HttpOnly = true,
-                        Expires = DateTime.UtcNow.AddMinutes(20),
-                        IsEssential = true,
-                        Secure = true
-                    });
-                    
-
-                    if (login.RememberMe == true)
-                    {
-                        Response.Cookies.Append("RememberMe", "true", new CookieOptions
-                        {
-                            Domain = "localhost",
-                            HttpOnly = false,
-                            Expires = DateTime.UtcNow.AddDays(30),
-                            IsEssential = true,
-                        });
-
-                        Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
-                        {
-                            Domain = "localhost",
-                            HttpOnly = true,
-                            Expires = DateTime.UtcNow.AddDays(30),
-                            IsEssential = true,
-                            Secure = true
-                        });
-                        Response.Cookies.Append("UserId", result.UserId, new CookieOptions
-                        {
-                            Domain = "localhost",
-                            HttpOnly = true,
-                            Expires = DateTime.UtcNow.AddDays(30),
-                            IsEssential = true,
-                            Secure = true
-                        });
-                    }
-                    else
-                    {
-                        Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
-                        {
-                            Domain = "localhost",
-                            HttpOnly = true,
-                            Expires = DateTime.UtcNow.AddHours(3),
-                            IsEssential = true,
-                            Secure = true
-                        });
-                        Response.Cookies.Append("UserId", result.UserId, new CookieOptions
-                        {
-                            Domain = "localhost",
-                            HttpOnly = true,
-                            Expires = DateTime.UtcNow.AddHours(3),
-                            IsEssential = true,
-                            Secure = true
-                        });
-                    }
-                  
-                    if (result.Username != null && HttpContext.Request.Cookies.ContainsKey(".AspNet.Consent"))
-                    {
-                        Response.Cookies.Append("Username", result.Username, new CookieOptions
-                        {
-                            Domain = "localhost",
-                            HttpOnly = true,
-                            Expires = DateTime.UtcNow.AddDays(20),
-                            Secure = true
-                        });
-                    }
                     return LocalRedirect(returnUrl);
                 }
+                ViewBag.ErrorMessage = result.ErrorMessage;
+                return View();
             }
             return View();
         }
@@ -242,7 +185,7 @@ namespace SkillfullWebUI.Controllers
         public IActionResult ForgotPassword()
         {
             ForgotPasswordModel forgotPassword = new ForgotPasswordModel();
-            return View();
+            return View(forgotPassword);
         }
 
         [HttpPost]
@@ -251,7 +194,7 @@ namespace SkillfullWebUI.Controllers
             if (ModelState.IsValid)
             {
                 var result = await _apiService.ForgotPassword(forgotPassword.Email);
-                if (result.IsSuccessStatusCode)
+                if (result.Result == true)
                 {
                     return View("ForgotPasswordSuccess");
                 }
@@ -273,7 +216,7 @@ namespace SkillfullWebUI.Controllers
                 return View("Error");
             }
             ResetPasswordModel resetPassword = new ResetPasswordModel();
-            return View();
+            return View(resetPassword);
         }
 
         [HttpPost]
@@ -282,7 +225,7 @@ namespace SkillfullWebUI.Controllers
             if (ModelState.IsValid)
             {
                 var result = await _apiService.ResetPassword(resetPassword);
-                if (result.IsSuccessStatusCode)
+                if (result.Result == true)
                 {
                     return View("ResetPasswordSuccess");
                 }
@@ -301,19 +244,7 @@ namespace SkillfullWebUI.Controllers
 
         public IActionResult Logout()
         {
-            if(HttpContext.Request.Cookies.ContainsKey("refreshToken"))
-            {
-                HttpContext.Response.Cookies.Delete("refreshToken");
-                if (HttpContext.Request.Cookies.ContainsKey("token"))
-                {
-                    HttpContext.Response.Cookies.Delete("token");
-                }
-                if (HttpContext.Request.Cookies.ContainsKey("Username"))
-                {
-                    HttpContext.Response.Cookies.Delete("Username");
-                }
-                return RedirectToAction("Index","Home");
-            }
+            _cookieManager.RemoveAuthCookies();
             return RedirectToAction("Index", "Home");
         }
     }

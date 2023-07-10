@@ -9,11 +9,13 @@ namespace SkillfullWebUI.Controllers
     {
         private readonly ILogger<UserSkillsController> _logger;
         private readonly IApiService _apiService;
+        private readonly ICookieManagerService _cookieManager;
 
-        public UserSkillsController(ILogger<UserSkillsController> logger, IApiService apiService)
+        public UserSkillsController(ILogger<UserSkillsController> logger, IApiService apiService, ICookieManagerService cookieManager)
         {
             _logger = logger;
             _apiService = apiService;
+            _cookieManager = cookieManager;
         }
 
 
@@ -24,55 +26,49 @@ namespace SkillfullWebUI.Controllers
                 return View("Error");
             }
             ViewBag.SkillName = HttpUtility.UrlDecode(skillName);
-            AddUserSkillModel addUserSkill = new AddUserSkillModel();
-            return View();
+            AddUserSkillViewModel addUserSkill = new AddUserSkillViewModel();
+            return View(addUserSkill);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddUserSkill(AddUserSkillModel addUserSkill)
+        public async Task<IActionResult> AddUserSkill(AddUserSkillViewModel addUserSkill)
         {
             if (!ModelState.IsValid)
             {
                 return View("Error");
             }
-            else
+            if (_cookieManager.AreAuthCookiesPresent() == false)
             {
-                if (HttpContext.Request.Cookies.ContainsKey("UserId"))
-                {
-                    var result = await _apiService.AddUserSkill(HttpContext.Request.Cookies["UserId"], addUserSkill.SkillId, addUserSkill.SkillName, addUserSkill.SkillAssessmentId);
-                    if (result.IsSuccessStatusCode)
-                    {
-                        return View("AddUserSkillSuccess");
-                    }
-                    else
-                    {
-                        return View("Error");
-                    }
-                }
-                else
-                {
-                    return View("Error");
-                }
+                ViewBag.ErrorMessage = "You must be logged in to perform this action.";
+                return RedirectToAction("Login", "Auth");
+            }  
+            var result = await _apiService.AddUserSkill(addUserSkill);
+            if (result.Result == true)
+            {
+                return View("AddUserSkillSuccess");
             }
+            return View("Error");
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllUserSkills()
         {
-            if (HttpContext.Request.Cookies.ContainsKey("UserId"))
+            if (_cookieManager.AreAuthCookiesPresent() == false)
             {
-                var result = await _apiService.GetAllUserSkills(HttpContext.Request.Cookies["UserId"]);
-                if (result.Count > 0)
-                {
-                    return View(result);
-                }
-                else if(result.Count == 0)
-                {
-                    ViewBag.InfoMessage = "No skills added to profile";
-                    return View();
-                }
-                else { return View("Error"); }
-            } else { return View("Error"); }
+                ViewBag.ErrorMessage = "You must be logged in to perform this action.";
+                return View();
+            }
+            var response = await _apiService.GetAllUserSkills();
+            if(response.Result == false)
+            {
+                return View("Error");
+            }
+            if (response.Result == true && response.Content == null)
+            {
+                ViewBag.ErrorMessage = "You haven't added any skills yet";
+                return View();
+            }
+            return View(response.Content);
         }
 
         public IActionResult UpdateUserSkill(string? userSkillId = null, string? skillName = null)
@@ -92,14 +88,19 @@ namespace SkillfullWebUI.Controllers
             {
                 return View("Error");
             }
-            var result = await _apiService.UpdateUserSkill(updateUserSkill.UserSkillId, updateUserSkill.NewSkillAssessmentId);
-            if (result.IsSuccessStatusCode)
+            if (_cookieManager.AreAuthCookiesPresent() == false)
             {
-                return View("UpdateUserskillSuccess");
+                ViewBag.ErrorMessage = "You must be logged in to perform this action.";
+                return View();
             }
-            return View("Error");
-        }
 
+            var response = await _apiService.UpdateUserSkill(updateUserSkill.UserSkillId, updateUserSkill.NewSkillAssessmentId);
+            if(response.Result == false)
+            {
+                return View("Error");
+            }
+            return View("UpdateUserSkillSuccess");
+        }
 
         public async Task<IActionResult> DeleteUserSkill(string? userSkillId = null)
         {
@@ -107,13 +108,18 @@ namespace SkillfullWebUI.Controllers
             {
                 return View("Error");
             }
-            var result = await _apiService.DeleteUserSkill(userSkillId);
-            if (result.IsSuccessStatusCode)
+            if(_cookieManager.AreAuthCookiesPresent() == false)
             {
-
-                return View("DeleteUserSkillSuccess");
+                ViewBag.ErrorMessage = "You must be logged in to perform this action.";
+                return View();
             }
-            return View("Error");
+          
+            var result = await _apiService.DeleteUserSkill(userSkillId);
+            if(result.Result == false)
+            {
+                return View("Error");
+            }
+            return View("DeleteUserSkillSuccess");
         }
 
         public IActionResult AddUserSkillTask(string? userSkillId = null, string? userSkillName = null)
@@ -129,51 +135,115 @@ namespace SkillfullWebUI.Controllers
         [HttpPost]
         public async Task<IActionResult> AddUserSkillTask(AddUserSkillTaskModel addUserSkillTask)
         {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.ErrorMessage = "Not all necessary information have been provided";
+                return View();
+            }
+            if(_cookieManager.AreAuthCookiesPresent() == false)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+            var result = await _apiService.AddTask(addUserSkillTask);
+            if(result.Result == false)
+            {
+                return View("Error");
+            }
+            return View("AddUserSkillTaskSuccess");
+
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllTasksByUserId()
+        {
+   
+            var response = await _apiService.GetAllTasksByUserId();
+            if (response.Result == false)
+            {
+                return View("Error");
+            }
+            if (response.Content == null)
+            {
+                ViewBag.ErrorMessage = "You haven't added any skills yet";
+                return View();
+            }
            
-            if(ModelState.IsValid)
-            {
-                if (HttpContext.Request.Cookies.ContainsKey("UserId"))
-                {
-                    var result = await _apiService.AddUserSkillTask(addUserSkillTask, HttpContext.Request.Cookies["UserId"]);
-                    if (result.IsSuccessStatusCode)
-                    {
-                        return View("AddUserSkillTaskSuccess");
-                    }
-                    return View("Error");
-                }
-            }
-            return View("Error");
+            return View("GetAllUserSkillTasks_User",response.Content);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllUserSkillTasks_User()
+        public async Task<IActionResult> GetAllTasksByUserSkillId(string? userSkillId = null, string? userSkillName = null)
         {
-            if (HttpContext.Request.Cookies.ContainsKey("UserId"))
+            if(string.IsNullOrEmpty(userSkillId) || string.IsNullOrEmpty(userSkillName))
             {
-                var response = await _apiService.GetAllUserSkillTasks_User(HttpContext.Request.Cookies["UserId"]);
-                if(response.Count > 0 && response != null)
-                {
-                    return View(response);
-                }
                 return View("Error");
             }
-            return View("Error");   
+            if(_cookieManager.AreAuthCookiesPresent() == false)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+           
+            var response = await _apiService.GetAllTasksByUserSkillId(userSkillId);
+            if (response.Result == false)
+            {
+                return View("Error");
+            }
+            if (response.Content == null)
+            {
+                ViewBag.ErrorMessage = "You haven't added any skills yet";
+                return View();
+            }  
+            return View("GetAllUserSkillTasks_Skill", response.Content);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllUserSkillTasks_Skill(string? userSkillId = null, string? userSkillName = null)
+        public IActionResult UpdateUserSkillTask(string? userSkillTaskId = null, string? taskName = null)
         {
-            if (HttpContext.Request.Cookies.ContainsKey("UserId"))
+            if(string.IsNullOrEmpty(userSkillTaskId) || string.IsNullOrEmpty(taskName))
             {
-                var response = await _apiService.GetAllUserSkillTasks_Skill(userSkillId);
-                if (response.Count > 0 && response != null)
-                {
-                    ViewBag.InfoMessage = string.Concat("Tasks for", userSkillName);
-                    return View(response);
-                }
                 return View("Error");
             }
-            return View("Error");
+            UpdateUserSkillTaskModel updateUserSkillTask = new UpdateUserSkillTaskModel();
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ModifyTask([FromForm]UpdateUserSkillTaskModel updateTask)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("Error");
+            }
+            if (_cookieManager.AreAuthCookiesPresent() == false)
+            {
+                ViewBag.ErrorMessage = "You must be logged in to perform this action.";
+                return View();
+            }
+            var response = await _apiService.ModifyTask(updateTask);
+            if (response.Result == false)
+            {
+                return View("Error");
+            }
+            return View("UpdateUserSkillSuccess");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteUserSkillTask(string? userSkillTaskId = null)
+        {
+            if(string.IsNullOrEmpty (userSkillTaskId))
+            {
+                return View("Error");
+            }
+            if (_cookieManager.AreAuthCookiesPresent() == false)
+            {
+                ViewBag.ErrorMessage = "You must be logged in to perform this action.";
+                return View();
+            }
+            var response = await _apiService.DeleteTask(userSkillTaskId);
+            if (response.Result == false)
+            {
+                return View("Error");
+            }
+            return View("DeleteUserSkillTaskSuccess");
         }
     }
 }

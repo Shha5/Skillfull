@@ -1,0 +1,39 @@
+﻿@using SkillfullWebUI.Models.UserSkillsModels;
+@model UpdateUserSkillTaskModel
+
+<h1>Add task corresponding to skill</h1>
+@ViewBag.SkillName
+@ViewBag.ErrorMessage
+<form asp-controller="UserSkills" asp-action="UpdateUserSkillTask" method="post" role="form">
+    <hr />
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <input asp-for="UserSkillTaskId" hidden />
+    <div class="form-group">
+        <label asp-for="NewTaskName" class="col-md-2"></label>
+        <div class="col-md-10">
+            <input asp-for="NewTaskName" class="form-control" maxlength="100" />
+            <span asp-validation-for="NewTaskName" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="NewTaskDescription" class="col-md-2"></label>
+        <div class="col-md-10">
+            <textarea asp-for="NewTaskDescription" class="form-control" maxlength="300">
+            </textarea>
+            <span asp-validation-for="NewTaskDescription" class="text-danger"></span>
+        </div>
+    </div>
+    <div>
+        <h5>Task status:</h5>
+        <select asp-for="NewTaskStatusId" class="form-select" aria-label="Default select example">
+            <option selected value="1">Not started</option>
+            <option value="2">In progress</option>
+            <option value="3">Done</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-success form-control">Update</button>
+        </div>
+    </div>
+</form>

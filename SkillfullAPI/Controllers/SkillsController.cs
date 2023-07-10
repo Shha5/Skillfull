@@ -16,7 +16,7 @@ namespace SkillfullAPI.Controllers
         }
 
         [HttpGet]
-        [Route("getAllSkills")]
+        [Route("GetAllSkills")]
         public async Task<SkillDataModel> GetAllSkills()
         {
             SkillDataModel result = await _skillsApiService.GetLightcastSkillsData<SkillDataModel>();
@@ -28,7 +28,7 @@ namespace SkillfullAPI.Controllers
         }
 
         [HttpGet]
-        [Route("getSkillDetailsById")]
+        [Route("GetSkillDetailsById")]
         public async Task<SkillDetailsDataModel> GetSkillDetailsById(string skillId)
         {
             SkillDetailsDataModel result = await _skillsApiService.GetLightcastSkillsData<SkillDetailsDataModel>(skillId);

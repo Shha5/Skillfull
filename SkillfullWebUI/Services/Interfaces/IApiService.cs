@@ -1,4 +1,5 @@
-﻿using SkillfullWebUI.Models.AuthModels;
+﻿using SkillfullWebUI.Models;
+using SkillfullWebUI.Models.AuthModels;
 using SkillfullWebUI.Models.SkillModels;
 using SkillfullWebUI.Models.UserSkillsModels;
 
@@ -6,21 +7,28 @@ namespace SkillfullWebUI.Services.Interfaces
 {
     public interface IApiService
     {
-        Task<List<SkillModel>> GetAllSkills();
-        Task<SkillDetailsModel> GetSkillDetailsById(string skillId);
-        Task<HttpResponseMessage> Register(RegistrationRequestModel registrationRequest);
-        Task<HttpResponseMessage> ConfirmEmail(EmailConfirmationModel emailConfirmation);
-        Task<HttpResponseMessage> ResendEmailConfirmation(ResendEmailConfirmationModel resendEmailConfirmation);
-        Task<AuthResultModel> Login(LoginModel login);
-        Task<HttpResponseMessage> ForgotPassword(string email);
-        Task<HttpResponseMessage> ResetPassword(ResetPasswordModel resetPassword);
-        Task<HttpResponseMessage> ChangePassword(ChangePasswordModel changePassword, string userId);
-        Task<HttpResponseMessage> AddUserSkill(string userId, string skillId, string skillName, string skillAssessmentId);
-        Task<List<UserSkillModel>> GetAllUserSkills(string userId);
-        Task<HttpResponseMessage> UpdateUserSkill(string userSkillId, string newSkillAssessmentId);
-        Task<HttpResponseMessage> DeleteUserSkill(string userSkillId);
-        Task<HttpResponseMessage> AddUserSkillTask(AddUserSkillTaskModel addUserSkillTask, string userId);
-        Task<List<UserSkillTaskModel>> GetAllUserSkillTasks_User(string userId);
-        Task<List<UserSkillTaskModel>> GetAllUserSkillTasks_Skill(string userSkillId);
+        //SKILLS
+        Task<ApiServiceGetResponseModel<List<SkillModel>>> GetAllSkills();
+        Task<ApiServiceGetResponseModel<SkillDetailsModel>> GetSkillDetailsById(string skillId);
+
+        //AUTH
+        Task<ApiServicePostResponseModel> ConfirmEmail(EmailConfirmationModel emailConfirmation);
+        Task<ApiServicePostResponseModel> Login(LoginModel login);
+        Task<ApiServicePostResponseModel> Register(RegistrationRequestModel registrationRequest);
+        Task<ApiServicePostResponseModel> ResendEmailConfirmation(ResendEmailConfirmationModel resendEmailConfirmation);
+        Task<ApiServicePostResponseModel> ForgotPassword(string email);
+        Task<ApiServicePostResponseModel> ResetPassword(ResetPasswordModel resetPassword);
+        Task<ApiServicePostResponseModel> ChangePassword(ChangePasswordModel changePassword);
+
+        //USERSKILLS
+        Task<ApiServicePostResponseModel> AddUserSkill(AddUserSkillViewModel addUserSkill);
+        Task<ApiServiceGetResponseModel<List<UserSkillModel>>> GetAllUserSkills();
+        Task<ApiServicePostResponseModel> UpdateUserSkill(string userSkillId, string newSkillAssessmentId);
+        Task<ApiServicePostResponseModel> DeleteUserSkill(string userSkillId);
+        Task<ApiServicePostResponseModel> AddTask(AddUserSkillTaskModel addUserSkillTask);
+        Task<ApiServiceGetResponseModel<List<UserSkillTaskModel>>> GetAllTasksByUserId();
+        Task<ApiServiceGetResponseModel<List<UserSkillTaskModel>>> GetAllTasksByUserSkillId(string userSkillId);
+        Task<ApiServicePostResponseModel> ModifyTask(UpdateUserSkillTaskModel updateUserSkillTask);
+        Task<ApiServicePostResponseModel> DeleteTask(string userSkillTaskId);
     }
 }

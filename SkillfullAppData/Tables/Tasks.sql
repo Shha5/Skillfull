@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[UserSkillTasks]
+﻿CREATE TABLE [dbo].[Tasks]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY,
     [UserId] NVARCHAR(50) NOT NULL,
@@ -9,6 +9,6 @@
     [CreatedDate] DATETIME2 NOT NULL DEFAULT getdate(), 
     [ModifiedDate] DATETIME2 NOT NULL DEFAULT getdate(), 
     [UserSkillName] NVARCHAR(150) NOT NULL,
-    CONSTRAINT [FK_UserSkillTasks_UserSkillsId] FOREIGN KEY ([UserSkillId]) REFERENCES [UserSkills]([Id]), 
-    CONSTRAINT [FK_UserSkillTasks_TaskStatusId] FOREIGN KEY ([StatusId]) REFERENCES [TaskStatus]([Id]) 
+    CONSTRAINT [FK_Tasks_UserSkillsId] FOREIGN KEY ([UserSkillId]) REFERENCES [UserSkills]([Id]), 
+    CONSTRAINT [FK_Tasks_TaskStatusId] FOREIGN KEY ([StatusId]) REFERENCES [TaskStatus]([Id]) 
 )

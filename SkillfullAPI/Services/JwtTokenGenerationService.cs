@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SkillfullAPI.Data;
 using SkillfullAPI.Models.AuthModels;
@@ -62,9 +61,6 @@ namespace SkillfullAPI.Services
             await _context.RefreshTokens.AddAsync(refreshToken);
             await _context.SaveChangesAsync();
 
-            
-     
-
             return new AuthResultModel()
             {
                 Result = true,
@@ -72,6 +68,30 @@ namespace SkillfullAPI.Services
                 RefreshToken = refreshToken.Token
             };
 
+        }
+
+        public async Task<bool> IsTokenValid(string token)
+        {
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+            try
+            {
+                var tokenInVerification = jwtTokenHandler.ValidateToken(token, _validationParameters, out var validatedToken);
+                var unixExpiryDate = long.Parse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
+                var expiryDateTime = UnixTimeStampToDateTime(unixExpiryDate);
+
+                if(expiryDateTime < DateTime.UtcNow.AddMinutes(1))
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            } catch (Exception ex)
+            {
+                return false;
+            }
+            
         }
 
         public async Task<AuthResultModel> VerifyAndGenerateToken(TokenRequestDto tokenRequest)
@@ -97,7 +117,7 @@ namespace SkillfullAPI.Services
                     }
                 }
 
-                if(expiryDateTime < DateTime.UtcNow || storedToken.ExpiryDate < DateTime.UtcNow)
+                if(storedToken.ExpiryDate < DateTime.UtcNow)
                 {
                     return new AuthResultModel()
                     {

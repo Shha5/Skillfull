@@ -5,14 +5,17 @@ namespace DataAccessLibrary.Data.Interfaces
     public interface IUserSkillsData
     {
         Task AddUserSkill(string userId, UserSkillDataModel userSkill);
-        List<UserSkillDataModel> GetUserSkills(string userId);
-        Task AddUserSkillTask(string userSkillId, UserSkillTaskDataModel userSkillTask);
-        List<UserSkillTaskDataModel> GetUserSkillTasks(string userSkillId);
-        List<UserSkillTaskDataModel> GetUserSkillTasksPerUser(string userId);
-        List<UserSkillTaskDataModel> GetUserSkillTasksPerSkill(string userSkillId);
+        Task AddTask(string userId, TaskDataModel task);
+        Task DeleteUserSkill(int userSkillId);
+        Task DeleteTask(int taskId);
+        List<UserSkillDataModel> GetUserSkills(string userId); 
+        List<TaskDataModel> GetTasksByUserId(string userId);
+        List<TaskDataModel> GetTasksForUserSkillId(string userSkillId);
+        Task ModifyTask(TaskDataModel task);
         Task UpdateUserSkillAssessment(int userSkillId, int skillAssessmentId);
-        Task UpdateUserSkillTasks(UserSkillTaskDataModel userSkillTask);
-        Task DeleteUserSkills(int userSkillId);
-        Task DeleteUserSkillTasks(int userSkillTaskId);
+        
+        
+
+
     }
 }

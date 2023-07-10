@@ -1,6 +1,6 @@
 ﻿namespace DataAccessLibrary.Models
 {
-    public class UserSkillTaskDataModel
+    public class TaskDataModel
     {
         public int? Id { get; set; } = null;
         public string Name { get; set; }

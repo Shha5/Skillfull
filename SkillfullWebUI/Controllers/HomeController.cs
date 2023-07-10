@@ -27,11 +27,16 @@ namespace SkillfullWebUI.Controllers
             return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Attributions()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View();
         }
+
+        //[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        //public IActionResult Error()
+        //{
+        //    return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        //}
 
         [HttpGet]
         public async Task<IActionResult> GetAllSkills(string? searchPhrase)
@@ -43,7 +48,7 @@ namespace SkillfullWebUI.Controllers
             }
             else
             {
-                var searchResult = result.Where(skill => skill.Name.ToLower().Contains(searchPhrase.ToLower())); 
+                var searchResult = result.Content.Where(skill => skill.Name.ToLower().Contains(searchPhrase.ToLower())); 
                 return View(searchResult.ToList());
             } 
         }

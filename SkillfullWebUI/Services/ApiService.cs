@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using SkillfullWebUI.Constants;
+using SkillfullWebUI.Models;
 using SkillfullWebUI.Models.AuthModels;
 using SkillfullWebUI.Models.SkillModels;
 using SkillfullWebUI.Models.UserSkillsModels;
 using SkillfullWebUI.Services.Interfaces;
+using System.Net.Http.Headers;
 using System.Web;
 
 
@@ -13,95 +15,122 @@ namespace SkillfullWebUI.Services
     {
         private readonly ILogger<ApiService> _logger;
         private readonly HttpClient _apiClient;
+        private readonly ICookieManagerService _cookieManager;
 
 
-        public ApiService(ILogger<ApiService> logger, HttpClient apiClient)
+        public ApiService(ILogger<ApiService> logger, HttpClient apiClient, ICookieManagerService cookieManager)
         {
             _logger = logger;
             _apiClient = apiClient;
-
+            _cookieManager = cookieManager;
         }
-        //LIGHTCAST
-        //get all skills 
+        // ALL SKILLS
 
-        public async Task<List<SkillModel>> GetAllSkills()
+        public async Task<ApiServiceGetResponseModel<List<SkillModel>>> GetAllSkills()
         {
-            string apiResponseString = await GetAllSkillsApiResponse();
-            if (string.IsNullOrEmpty(apiResponseString))
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.GetAllSkills);
+            var response = await _apiClient.GetAsync(url);
+            if (response.IsSuccessStatusCode == false)
             {
-                return null;
+                return new ApiServiceGetResponseModel<List<SkillModel>>()
+                {
+                    Result = false,
+                    ErrorMessage = "Couldn't retrieve skills list"
+                };
             }
-            SkillDataModel skillData = await DeserializeApiResponseAsync<SkillDataModel>(apiResponseString);
+            var responseString = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrEmpty(responseString))
+            {
+                return new ApiServiceGetResponseModel<List<SkillModel>>()
+                {
+                    Result = false,
+                    ErrorMessage = "Couldn't retrieve skills list"
+                };
+ 
+            }
+            SkillDataModel skillData = await DeserializeApiResponseAsync<SkillDataModel>(responseString);
             List<SkillModel> skills = new List<SkillModel>();
             foreach (var skill in skillData.Data)
             {
                 skills.Add(skill);
             }
-            return skills;
+            return new ApiServiceGetResponseModel<List<SkillModel>>()
+            {
+                Result = true,
+                Content = skills
+            };
         }
 
-        private async Task<string> GetAllSkillsApiResponse()
-        {
-            string url = "https://localhost:7071/api/Skills/getAllSkills";
-            var apiResponse = await _apiClient.GetAsync(url);
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                string responseAsString = await apiResponse.Content.ReadAsStringAsync();
-                return responseAsString;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        //get skill details
-        public async Task<SkillDetailsModel> GetSkillDetailsById(string skillId)
-        {
-            string apiResponseString = await GetSkillDetailsApiResponse(skillId);
-            if (string.IsNullOrEmpty(apiResponseString))
-            {
-                return null;
-            }
-            SkillDetailsDataModel skillDetails = await DeserializeApiResponseAsync<SkillDetailsDataModel>(apiResponseString);
-            
-            return skillDetails.Data;
-        }
-
-        private async Task<string> GetSkillDetailsApiResponse(string skillId)
+        public async Task<ApiServiceGetResponseModel<SkillDetailsModel>> GetSkillDetailsById(string skillId)
         {
             if (string.IsNullOrWhiteSpace(skillId))
             {
                 return null;
             }
-            string url = "https://localhost:7071/api/Skills/getSkillDetailsById?skillId=";
-            var apiResponse = await _apiClient.GetAsync(string.Concat(url, skillId));
-            if (apiResponse.IsSuccessStatusCode)
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.GetSkillDetailsById, "?skillId=", skillId);
+            var response = await _apiClient.GetAsync(url);
+            if (response.IsSuccessStatusCode)
             {
-                string responseAsString = await apiResponse.Content.ReadAsStringAsync();
-                return responseAsString;
+                string responseString = await response.Content.ReadAsStringAsync();
+
+                if (string.IsNullOrEmpty(responseString))
+                {
+                    return new ApiServiceGetResponseModel<SkillDetailsModel>()
+                    {
+                        Result = false,
+                        Content = null,
+                        ErrorMessage = "Couldn't retrieve skill details."
+                    };
+                }
+                SkillDetailsDataModel skillDetails = await DeserializeApiResponseAsync<SkillDetailsDataModel>(responseString);
+                if (skillDetails.Data == null)
+                {
+                    return new ApiServiceGetResponseModel<SkillDetailsModel>()
+                    {
+                        Result = false,
+                        Content = null,
+                        ErrorMessage = "Couldn't retrieve skill details."
+                    };
+                }
+                return new ApiServiceGetResponseModel<SkillDetailsModel>()
+                {
+                    Result = true,
+                    Content = skillDetails.Data
+                };
             }
-            else
+            return new ApiServiceGetResponseModel<SkillDetailsModel>()
             {
-                return null;
-            }
-        }
+                Result = false,
+                Content = null,
+                ErrorMessage = "Couldn't retrieve skill details."
+            };
+        }  
 
         //AUTH
-        //Confirm email
-        public async Task<HttpResponseMessage> ConfirmEmail(EmailConfirmationModel emailConfirmation)
+        
+        public async Task<ApiServicePostResponseModel> ConfirmEmail(EmailConfirmationModel emailConfirmation)
         {
-            string baseUrl = "https://localhost:7071/api/Auth/ConfirmEmail";
             var token = HttpUtility.UrlEncode(emailConfirmation.EmailConfirmationToken);
-            string url = string.Concat(baseUrl, "?userId=", emailConfirmation.UserId, "&emailConfirmationToken=", token);
-            return await _apiClient.PostAsync(url, null);
-
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.ConfirmEmail, "?userId=", emailConfirmation.UserId, "&emailConfirmationToken=", token);
+            var response = await _apiClient.PostAsync(url, null);
+            if (response.IsSuccessStatusCode == false)
+            {
+                return new ApiServicePostResponseModel()
+                {
+                    Result = false,
+                    ErrorMessage = response.StatusCode.ToString()
+                };
+            }
+            return new ApiServicePostResponseModel()
+            {
+                Result = true,
+                ErrorMessage = null
+            };
         }
-        // Forgot password
-        //Login
-        public async Task<AuthResultModel> Login(LoginModel login)
+       
+        public async Task<ApiServicePostResponseModel> Login(LoginModel login)
         {
-            string url = "https://localhost:7071/api/Auth/Login";
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.Login);
             var values = new Dictionary<string, string>()
             {
                 { "Email", login.Email },
@@ -110,29 +139,35 @@ namespace SkillfullWebUI.Services
 
             var requestContent = new FormUrlEncodedContent(values);
             var apiResponse = await _apiClient.PostAsync(url, requestContent);
-            if (!apiResponse.IsSuccessStatusCode)
+            if (apiResponse.IsSuccessStatusCode == false)
             {
-                return new AuthResultModel()
+                return new ApiServicePostResponseModel()
                 {
-                    Errors = new List<string>()
-                    {
-                        "Something went wrong"
-                    }
+                    Result = false,
+                    ErrorMessage = "Something went wrong"
                 };
-
             }
             else
             {
                 string apiResponseAsString = await apiResponse.Content.ReadAsStringAsync();
-                return await DeserializeApiResponseAsync<AuthResultModel>(apiResponseAsString);
+                var authResult = await DeserializeApiResponseAsync<AuthResultModel>(apiResponseAsString);
+                if(authResult == null || authResult.Result == false)
+                {
+                    return new ApiServicePostResponseModel()
+                    {
+                        Result = false,
+                        ErrorMessage = "Something went wrong"
+                    };
+                }
+                _cookieManager.CreateAuthCookies(authResult, login.RememberMe);
+                return new ApiServicePostResponseModel() 
+                { Result = true };
             }
-
         }
 
-        //Register
-        public async Task<HttpResponseMessage> Register(RegistrationRequestModel registrationRequest)
+        public async Task<ApiServicePostResponseModel> Register(RegistrationRequestModel registrationRequest)
         {
-            string url = "https://localhost:7071/api/Auth/Register";
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.Register);
             var values = new Dictionary<string, string>()
             {
                 {"Name", registrationRequest.Name },
@@ -142,32 +177,25 @@ namespace SkillfullWebUI.Services
             };
             var requestContent = new FormUrlEncodedContent(values);
 
-            return await _apiClient.PostAsync(url, requestContent);
-        }
-        //RefreshTOken --> not available to user directly
-        public async Task<AuthResultModel> RefreshToken(string token, string refreshToken)
-        {
-            string url = "https://localhost:7071/api/Auth/RefreshToken";
-            var values = new Dictionary<string, string>()
-            { {"Token", token},
-            {"RefreshToken", refreshToken} };
-            var requestContent = new FormUrlEncodedContent(values);
-            var apiResponse = await _apiClient.PostAsync(url, requestContent);
-            if (apiResponse.IsSuccessStatusCode)
+            var response = await _apiClient.PostAsync(url, requestContent);
+            if(response.IsSuccessStatusCode == false)
             {
-                var apiResponseAsString = await apiResponse.Content.ReadAsStringAsync();
-                return await DeserializeApiResponseAsync<AuthResultModel>(apiResponseAsString);
+                return new ApiServicePostResponseModel()
+                {
+                    Result = false,
+                    ErrorMessage = response.StatusCode.ToString()
+                };
             }
-            else
+            return new ApiServicePostResponseModel()
             {
-                return null;
-            }
+                Result = true,
+                ErrorMessage = null
+            };
         }
 
-        //Resend Email confirmation
-        public async Task<HttpResponseMessage> ResendEmailConfirmation(ResendEmailConfirmationModel resendEmailConfirmation)
+        public async Task<ApiServicePostResponseModel> ResendEmailConfirmation(ResendEmailConfirmationModel resendEmailConfirmation)
         {
-            string url = "https://localhost:7071/api/Auth/ResendEmailConfirmation";
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.ResendEmailConfirmation);
             var values = new Dictionary<string, string>()
             {
                 {"Email", resendEmailConfirmation.Email },
@@ -175,42 +203,444 @@ namespace SkillfullWebUI.Services
             };
 
             var requestContent = new FormUrlEncodedContent(values);
-            return await _apiClient.PostAsync(url, requestContent);
+            var response = await _apiClient.PostAsync(url, requestContent);
+            if (response.IsSuccessStatusCode == false)
+            {
+                return new ApiServicePostResponseModel()
+                {
+                    Result = false,
+                    ErrorMessage = response.StatusCode.ToString()
+                };
+            }
+            return new ApiServicePostResponseModel()
+            {
+                Result = true,
+                ErrorMessage = null
+            };
         }
 
-        //Reset password
-        public async Task<HttpResponseMessage> ForgotPassword(string email)
+        public async Task<ApiServicePostResponseModel> ForgotPassword(string email)
         {
             var values = new Dictionary<string, string>(){{ "Email", email }};
             var requestContent = new FormUrlEncodedContent(values);
-            string url = "https://localhost:7071/api/Auth/ForgotPassword";
-            return await _apiClient.PostAsync(url, requestContent);
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.ForgotPassword);
+            var response = await _apiClient.PostAsync(url, requestContent);
+            if(response.IsSuccessStatusCode == false)
+            {
+                return new ApiServicePostResponseModel()
+                {
+                    Result = false,
+                    ErrorMessage = response.StatusCode.ToString()
+                };
+            }
+            return new ApiServicePostResponseModel()
+            {
+                Result = true,
+                ErrorMessage = null
+            };
         }
 
-        public async Task<HttpResponseMessage> ResetPassword(ResetPasswordModel resetPassword)
+        public async Task<ApiServicePostResponseModel> ResetPassword(ResetPasswordModel resetPassword)
         {
-            string url = "https://localhost:7071/api/Auth/ResetPassword";
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.ResetPassword);
             var values = new Dictionary<string, string>()
             { { "passwordResetToken", resetPassword.PasswordResetToken },
               { "userId", resetPassword.UserId },
               { "newPassword", HttpUtility.UrlEncode(resetPassword.Password) }
             };
             var requestContent = new FormUrlEncodedContent(values);
-            return await _apiClient.PostAsync(url, requestContent);
+            var response = await _apiClient.PostAsync(url, requestContent);
+            if(response.IsSuccessStatusCode == false)
+            {
+                return new ApiServicePostResponseModel()
+                {
+                    Result = false,
+                    ErrorMessage = response.StatusCode.ToString()
+                };
+            }
+            return new ApiServicePostResponseModel()
+            {
+                Result = true,
+                ErrorMessage = null
+            };
         }
 
-        //Change Password
-        public async Task<HttpResponseMessage> ChangePassword(ChangePasswordModel changePassword, string userId)
+        public async Task<ApiServicePostResponseModel> ChangePassword(ChangePasswordModel changePassword)
         {
-            string url = "https://localhost:7071/api/Auth/ChangePassword";
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.ChangePassword);
+            var authCookies = _cookieManager.GetAuthCookieValues();
             var values = new Dictionary<string, string>()
-            { { "UserId", userId },
+            { { "UserId", authCookies.UserId },
               { "CurrentPassword", changePassword.Password },
               {"NewPassword", changePassword.NewPassword } };
             var requestContent = new FormUrlEncodedContent(values);
-            return await _apiClient.PostAsync(url,requestContent);
+            var response = await _apiClient.PostAsync(url,requestContent);
+            if(response.IsSuccessStatusCode == false)
+            {
+                return new ApiServicePostResponseModel()
+                {
+                    Result = false,
+                    ErrorMessage = response.StatusCode.ToString()
+                };
+            }
+            return new ApiServicePostResponseModel()
+            {
+                Result = true,
+                ErrorMessage = null
+            };
+        }
+
+        //USERSKILLS
+        public async Task<ApiServicePostResponseModel> AddUserSkill(AddUserSkillViewModel addUserSkill)
+        {
+            var cookieVerification = await VerifyAndRefreshCookies();
+            if (cookieVerification.Result == false) 
+            {
+                return cookieVerification;
+            }
+            var authCookies = _cookieManager.GetAuthCookieValues();
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.AddUserSkill);
+            var values = new Dictionary<string, string>()
+            {
+                {"UserId", authCookies.UserId },
+                {"SkillId", addUserSkill.SkillId },
+                {"SkillName", addUserSkill.SkillName},
+                {"SkillAssessmentId", addUserSkill.SkillAssessmentId}
+            };
+
+            var requestContent = new FormUrlEncodedContent(values);
+
+            _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
+            var result = await _apiClient.PostAsync(url, requestContent);
+            if (result.IsSuccessStatusCode)
+            {
+                return new ApiServicePostResponseModel()
+                {
+                    Result = true,
+                    ErrorMessage = string.Empty
+                };
+            }
+            else
+            {
+                return new ApiServicePostResponseModel()
+                {
+                    Result = false,
+                    ErrorMessage = result.StatusCode.ToString()
+                };
+            }
 
         }
+
+        public async Task<ApiServiceGetResponseModel<List<UserSkillModel>>> GetAllUserSkills()
+        {
+            var cookieVerification = await VerifyAndRefreshCookies();
+            if (cookieVerification.Result == false)
+            {
+                return new ApiServiceGetResponseModel<List<UserSkillModel>>()
+                {
+                    Result = false,
+                    ErrorMessage = cookieVerification.ErrorMessage,
+                    Content = null
+                };
+            }
+            var authCookies =  _cookieManager.GetAuthCookieValues();
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.GetAllUserSkills, "?userId=", authCookies.UserId);
+        
+            _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
+           
+            var response = await _apiClient.GetAsync(url);
+           
+            if(response.IsSuccessStatusCode && response.Content == null)
+            {
+              return new ApiServiceGetResponseModel<List<UserSkillModel>>()
+               {
+                    Result = true,
+                    ErrorMessage = "No userskills were added",
+                    Content = null
+               };
+            }
+
+            string responseContent = await response.Content.ReadAsStringAsync();
+            var result = await DeserializeApiResponseAsync<List<UserSkillModel>>(responseContent);
+            return new ApiServiceGetResponseModel<List<UserSkillModel>>()
+            {
+                Result = true,
+                Content = result,
+                ErrorMessage = null
+            };
+        }
+
+        public async Task<ApiServicePostResponseModel> UpdateUserSkill(string userSkillId, string newSkillAssessmentId)
+        {
+            var cookieVerification = await VerifyAndRefreshCookies();
+            if (cookieVerification.Result == false)
+            {
+                return cookieVerification;
+            }
+            var authCookies = _cookieManager.GetAuthCookieValues();
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.UpdateUserSkill);
+            var values = new Dictionary<string, string>()
+            {
+                {"userSkillId", userSkillId },
+                {"newSkillAssessmentId", newSkillAssessmentId}
+            };
+
+            var requestContent = new FormUrlEncodedContent(values);
+            _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
+
+            var result = await _apiClient.PostAsync(url, requestContent);
+            if (result.IsSuccessStatusCode == false)
+            {
+                return new ApiServicePostResponseModel()
+                {
+                    Result = false,
+                    ErrorMessage = result.StatusCode.ToString()
+                };
+            }
+            return new ApiServicePostResponseModel()
+            {
+                Result = true,
+                ErrorMessage = null,
+            };
+        }
+
+        public async Task<ApiServicePostResponseModel> DeleteUserSkill(string userSkillId)
+        {
+            var cookieVerification = await VerifyAndRefreshCookies();
+            if (cookieVerification.Result == false)
+            {
+                return cookieVerification;
+            }
+            var authCookies = _cookieManager.GetAuthCookieValues();
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.DeleteUserSkill);
+            var values = new Dictionary<string, string>()
+            {
+                {"userSkillId", userSkillId }
+            };
+
+            var requestContent = new FormUrlEncodedContent(values);
+            _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
+            var response = await _apiClient.PostAsync(url, requestContent);
+            if(response.IsSuccessStatusCode == false)
+            {
+                return new ApiServicePostResponseModel()
+                {
+                    Result = false,
+                    ErrorMessage = response.StatusCode.ToString()
+                };
+            }
+            return new ApiServicePostResponseModel()
+            {
+                Result = true,
+                ErrorMessage = null
+            };
+        }
+
+        public async Task<ApiServicePostResponseModel> AddTask(AddUserSkillTaskModel addUserSkillTask)
+        {
+            var cookieVerification = await VerifyAndRefreshCookies();
+            if (cookieVerification.Result == false)
+            {
+                return cookieVerification;
+            }
+            var authCookies = _cookieManager.GetAuthCookieValues();
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.AddTask);
+            var values = new Dictionary<string, string>()
+            {
+                
+                {"userId", authCookies.UserId},
+                {"TaskName", addUserSkillTask.TaskName },
+                { "TaskDescription", addUserSkillTask.TaskDescription },
+                { "TaskStatusId", addUserSkillTask.TaskStatusId},
+                {"UserSkillId", addUserSkillTask.UserSkillId },
+                {"UserSkillName", addUserSkillTask.UserSkillName }
+            };
+
+            var requestContent = new FormUrlEncodedContent(values);
+            _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
+            var response = await _apiClient.PostAsync(url,requestContent);
+            if(response.IsSuccessStatusCode == false)
+            {
+                return new ApiServicePostResponseModel() 
+                {
+                    Result = false,
+                    ErrorMessage = response.StatusCode.ToString()
+                };
+            }
+            return new ApiServicePostResponseModel()
+            {
+                Result = true,
+                ErrorMessage = null
+            };
+        }
+
+
+        public async Task<ApiServiceGetResponseModel<List<UserSkillTaskModel>>> GetAllTasksByUserId()
+        {
+            var cookieVerification = await VerifyAndRefreshCookies();
+            if (cookieVerification.Result == false)
+            {
+                return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>()
+                {
+                    Result = false,
+                    ErrorMessage = cookieVerification.ErrorMessage,
+                    Content = null
+                };
+            }
+            var authCookies = _cookieManager.GetAuthCookieValues();
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.GetAllTasksByUserId, "?userId=", authCookies.UserId);
+            _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
+           var response = await _apiClient.GetAsync(url);
+            if(response.IsSuccessStatusCode == false)
+            {
+                return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>() 
+                {
+                    Result = false,
+                    ErrorMessage = response.StatusCode.ToString()
+                };
+            }
+            if (response.IsSuccessStatusCode && response.Content == null)
+            {
+                return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>()
+                {
+                    Result = true,
+                    ErrorMessage = "No content",
+                    Content = null
+                };
+            }
+            string responseString = await response.Content.ReadAsStringAsync();
+            var result = await DeserializeApiResponseAsync<List<UserSkillTaskModel>>(responseString);
+            return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>() 
+            {
+                Result = true,
+                ErrorMessage = null,
+                Content = result
+            };
+        }
+
+        public async Task<ApiServiceGetResponseModel<List<UserSkillTaskModel>>> GetAllTasksByUserSkillId(string userSkillId)
+        {
+            var cookieVerification = await VerifyAndRefreshCookies();
+            if (cookieVerification.Result == false)
+            {
+                return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>()
+                {
+                    Result = false,
+                    ErrorMessage = cookieVerification.ErrorMessage,
+                    Content = null
+                };
+            }
+            var authCookies = _cookieManager.GetAuthCookieValues();
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.GetAllTasksByUserSkillId, "?userSkillId=", userSkillId);
+
+            _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
+            var response = await _apiClient.GetAsync(url); 
+            if(response.IsSuccessStatusCode == false)
+            {
+                return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>()
+                {
+                    Result = false,
+                    ErrorMessage = response.StatusCode.ToString(),
+                    Content = null
+                };
+            }
+            if(response.IsSuccessStatusCode && response.Content == null)
+            {
+                return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>()
+                {
+                    Result = true,
+                    ErrorMessage = "No content",
+                    Content = null
+                };
+            }
+            string responseString = await response.Content.ReadAsStringAsync();
+            var result = await DeserializeApiResponseAsync<List<UserSkillTaskModel>>(responseString);
+            return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>()
+            {
+                Result = true,
+                ErrorMessage = null,
+                Content = result
+            };
+        }
+
+        public async Task<ApiServicePostResponseModel> ModifyTask(UpdateUserSkillTaskModel updateUserSkillTask)
+        {
+            var cookieVerification = await VerifyAndRefreshCookies();
+            if (cookieVerification.Result == false)
+            {
+                return cookieVerification;
+            }
+            var authCookies = _cookieManager.GetAuthCookieValues();
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.ModifyTask);
+            var values = new Dictionary<string, string>()
+            {
+                {"UserSkillTaskId", updateUserSkillTask.UserSkillTaskId },
+                {"NewTaskName", updateUserSkillTask.NewTaskName },
+                {"NewTaskDescription", updateUserSkillTask.NewTaskDescription},
+                {"NewTaskStatusId", updateUserSkillTask.NewTaskStatusId}
+            };
+            var requestContent = new FormUrlEncodedContent(values);
+            _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);            
+            var response = await _apiClient.PostAsync(url, requestContent);
+            if(response.IsSuccessStatusCode == false)
+            {
+                return new ApiServicePostResponseModel()
+                {
+                    Result = false,
+                    ErrorMessage = response.StatusCode.ToString()
+                };
+            }
+            return new ApiServicePostResponseModel()
+            {
+                Result = true,
+                ErrorMessage = null
+            };
+
+        }
+
+        public async Task<ApiServicePostResponseModel> DeleteTask( string userSkillTaskId)
+        {
+            var cookieVerification = await VerifyAndRefreshCookies();
+            if (cookieVerification.Result == false)
+            {
+                return cookieVerification;
+            }
+            var authCookies = _cookieManager.GetAuthCookieValues();
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.DeleteTask);
+            var values = new Dictionary<string, string>()
+            {
+                { "userSkillTaskId", userSkillTaskId }
+            };
+            var requestContent = new FormUrlEncodedContent(values);
+            _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
+            var response = await _apiClient.PostAsync(url, requestContent);
+            if(response.IsSuccessStatusCode == false)
+            {
+                return new ApiServicePostResponseModel()
+                {
+                    Result = false,
+                    ErrorMessage = response.StatusCode.ToString()
+                };
+            }
+            return new ApiServicePostResponseModel()
+            {
+                Result = true,
+                ErrorMessage = null
+            };
+        }
+
+        //PRIVATE METHODS
+        private async Task<HttpResponseMessage> CheckIfTokenIsValid(string token)
+        {
+            var values = new Dictionary<string, string>()
+            {
+                { "token", token }
+            };
+            string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.CheckIfTokenIsValid);
+            var requestContent = new FormUrlEncodedContent(values);
+            return await _apiClient.PostAsync(url, requestContent);
+        }
+
         private async Task<T> DeserializeApiResponseAsync<T>(string responseJson)
         {
             if (!string.IsNullOrEmpty(responseJson))
@@ -221,7 +651,7 @@ namespace SkillfullWebUI.Services
                     result = JsonConvert.DeserializeObject<T>(responseJson);
                 }
                 catch (Exception ex)
-                { 
+                {
                     return default(T);
                 }
                 return result;
@@ -232,141 +662,109 @@ namespace SkillfullWebUI.Services
             }
         }
 
-        //USERSKILLS
-        //Add userSkill
-        public async Task<HttpResponseMessage> AddUserSkill(string userId, string skillId, string skillName, string skillAssessmentId)
+        private async Task<AuthResultModel> RefreshToken(string token, string refreshToken)
         {
-            string url = "https://localhost:7071/api/UserSkills/addUserSkill";
+            string uri = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.RefreshToken);
             var values = new Dictionary<string, string>()
-            {
-                {"UserId", userId },
-                {"SkillId", skillId },
-                {"SkillName", skillName},
-                {"SkillAssessmentId", skillAssessmentId}
-            };
-
+            { {"Token", token},
+            {"RefreshToken", refreshToken} };
             var requestContent = new FormUrlEncodedContent(values);
-
-            return await _apiClient.PostAsync(url, requestContent);
-        }
-
-        //Get all userskills
-
-        public async Task<List<UserSkillModel>> GetAllUserSkills(string userId)
-        {
-            string url = "https://localhost:7071/api/UserSkills/getAllUserSkills";
-            string requestUri = string.Concat(url, "?userId=", userId);
-            var apiResponse = await _apiClient.GetAsync(requestUri);
-            if (apiResponse.IsSuccessStatusCode)
-            {
-                string apiResponseAsString = await apiResponse.Content.ReadAsStringAsync();
-                if (string.IsNullOrEmpty(apiResponseAsString))
-                {
-                    return new List<UserSkillModel>();
-                }
-                return await DeserializeApiResponseAsync<List<UserSkillModel>>(apiResponseAsString);
-            }
-            
-            return null;
-        }
-
-        //update userskill
-
-        public async Task<HttpResponseMessage> UpdateUserSkill(string userSkillId, string newSkillAssessmentId)
-        {
-            string url = "https://localhost:7071/api/UserSkills/updateUserSkill";
-            var values = new Dictionary<string, string>()
-            { 
-                {"userSkillId", userSkillId },
-                {"newSkillAssessmentId", newSkillAssessmentId}
-            };
-
-            var requestContent = new FormUrlEncodedContent(values);
-
-            return await _apiClient.PostAsync(url, requestContent);
-        }
-
-        //Delete userskill
-        public async Task<HttpResponseMessage> DeleteUserSkill(string userSkillId)
-        {
-            string url = "https://localhost:7071/api/UserSkills/deleteUserSkill";
-            var values = new Dictionary<string, string>()
-            {
-                {"userSkillId", userSkillId }
-            };
-
-            var requestContent = new FormUrlEncodedContent(values);
-
-            return await _apiClient.PostAsync(url, requestContent);
-        }
-
-        //Add task 
-
-        public async Task<HttpResponseMessage> AddUserSkillTask(AddUserSkillTaskModel addUserSkillTask, string userId)
-        {
-            string url = "https://localhost:7071/api/UserSkills/addUserSkillTask";
-            var values = new Dictionary<string, string>()
-            {
-                
-                {"userId", userId},
-                {"TaskName", addUserSkillTask.TaskName },
-                { "TaskDescription", addUserSkillTask.TaskDescription },
-                { "TaskStatusId", addUserSkillTask.TaskStatusId},
-                {"UserSkillId", addUserSkillTask.UserSkillId },
-                {"UserSkillName", addUserSkillTask.UserSkillName }
-            };
-
-            var requestContent = new FormUrlEncodedContent(values);
-
-            return await _apiClient.PostAsync(url,requestContent);
-        }
-
-        //Get all user tasks
-
-        public async Task<List<UserSkillTaskModel>> GetAllUserSkillTasks_User(string userId)
-        {
-            string url = "https://localhost:7071/api/UserSkills/getAllUserSkillTasksPerUser";
-            var requestUri = string.Concat(url, "?userId=", userId);
-            var apiResponse = await _apiClient.GetAsync(requestUri);
-
+            var apiResponse = await _apiClient.PostAsync(uri, requestContent);
             if (apiResponse.IsSuccessStatusCode)
             {
                 var apiResponseAsString = await apiResponse.Content.ReadAsStringAsync();
-                if (string.IsNullOrEmpty(apiResponseAsString))
-                {
-                    return null;
-                }
-                var deserializedResponse = await DeserializeApiResponseAsync<List<UserSkillTaskModel>>(apiResponseAsString);
-                return deserializedResponse;
+                return await DeserializeApiResponseAsync<AuthResultModel>(apiResponseAsString);
             }
-            return null;
-        }
-
-
-        public async Task<List<UserSkillTaskModel>> GetAllUserSkillTasks_Skill(string userSkillId)
-        {
-            string url = "https://localhost:7071/api/UserSkills/getAllUserSkillTasksPerSkill";
-            var requestUri = string.Concat(url, "?userSkillId=", userSkillId);
-            var apiResponse = await _apiClient.GetAsync(requestUri);
-
-            if (apiResponse.IsSuccessStatusCode)
+            else
             {
-                var apiResponseAsString = await apiResponse.Content.ReadAsStringAsync();
-                if (string.IsNullOrEmpty(apiResponseAsString))
-                {
-                    return null;
-                }
-                var deserializedResponse = await DeserializeApiResponseAsync<List<UserSkillTaskModel>>(apiResponseAsString);
-                return deserializedResponse;
+                return null;
             }
-            return null;
         }
 
-        //udate task
+        private async Task<ApiServicePostResponseModel> VerifyAndRefreshCookies()
+        {
+            if (_cookieManager.AreAuthCookiesPresent() == false)
+            {
+                return new ApiServicePostResponseModel()
+                {
+                    Result = false,
+                    ErrorMessage = "User is not logged in"
+                };
+            }
+            var authCookies = _cookieManager.GetAuthCookieValues();
+            var rememberMe = _cookieManager.IsRememberMeCookiePresent();
 
-        //delete task
+            var tokenValidation = await CheckIfTokenIsValid(authCookies.Token);
+            var tokenValidationString = await tokenValidation.Content.ReadAsStringAsync();
+            if (tokenValidationString == null)
+            {
+                _cookieManager.RemoveAuthCookies();
+                return new ApiServicePostResponseModel()
+                {
+                    Result = false,
+                    ErrorMessage = "An error occured. Logging in is required."
+                };
+            }
+            if (tokenValidationString.Contains("false"))
+            {
+                var refreshedAuthResult = await RefreshToken(authCookies.Token, authCookies.RefreshToken);
+                if (refreshedAuthResult == null || refreshedAuthResult.Result == false)
+                {
+                    _cookieManager.RemoveAuthCookies();
+                    return new ApiServicePostResponseModel()
+                    {
+                        Result = false,
+                        ErrorMessage = "An error occured. Logging in is required."
+                    };
+                }
+                _cookieManager.RemoveAuthCookies();
+                _cookieManager.CreateAuthCookies(refreshedAuthResult, rememberMe);
+                return new ApiServicePostResponseModel()
+                {
+                    Result = true,
+                    ErrorMessage = string.Empty
+                };
+            }
 
+            return new ApiServicePostResponseModel()
+            {
+                Result = true,
+                ErrorMessage = string.Empty
+            };
+        }
 
+        //private async Task<string> GetAllSkillsApiResponse()
+        //{
+        //    ;
+        //    var apiResponse = await _apiClient.GetAsync(uri);
+        //    if (apiResponse.IsSuccessStatusCode)
+        //    {
+        //        string responseAsString = await apiResponse.Content.ReadAsStringAsync();
+        //        return responseAsString;
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
+        //}
 
+        //private async Task<string> GetSkillDetailsApiResponse(string skillId)
+        //{
+        //    if (string.IsNullOrWhiteSpace(skillId))
+        //    {
+        //        return null;
+        //    }
+        //    string uri = string.Concat(SkillfullApiEndpoints.BaseUri,SkillfullApiEndpoints.GetSkillDetailsById, "?skillId=", skillId);
+
+        //    if (apiResponse.IsSuccessStatusCode)
+        //    {
+        //        string responseAsString = await apiResponse.Content.ReadAsStringAsync();
+        //        return responseAsString;
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
+        //}
     }
 }

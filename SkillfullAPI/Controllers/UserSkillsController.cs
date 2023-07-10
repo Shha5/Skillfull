@@ -3,9 +3,12 @@ using SkillfullAPI.Models.AppModels;
 using DataAccessLibrary.Data.Interfaces;
 using DataAccessLibrary.Models;
 using System.Web;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace SkillfullAPI.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     [Route("api/[controller]")]
     public class UserSkillsController : ControllerBase
@@ -20,7 +23,8 @@ namespace SkillfullAPI.Controllers
         }
 
         [HttpPost]
-        [Route("addUserSkill")]
+        [Route("AddUserSkill")]
+      
         public async Task<IActionResult> AddUserSkill([FromForm] UserSkillModel userSkillModel, [FromForm] string userId)
         {
             if (ModelState.IsValid && !string.IsNullOrEmpty(userId))
@@ -43,7 +47,7 @@ namespace SkillfullAPI.Controllers
         }
 
         [HttpGet]
-        [Route("getAllUserSkills")]
+        [Route("GetAllUserSkills")]
         public async Task<List<UserSkillModel>> GetAllUserSkills(string userId)
         {
             if (string.IsNullOrEmpty(userId))
@@ -70,7 +74,7 @@ namespace SkillfullAPI.Controllers
         }
 
         [HttpPost]
-        [Route("updateUserSkill")]
+        [Route("UpdateUserSkill")]
         public async Task<IActionResult> UpdateUserSkill([FromForm] int userSkillId,[FromForm] int newSkillAssessmentId)
         {
             if (newSkillAssessmentId == null || newSkillAssessmentId <= 0 || newSkillAssessmentId > 5 || userSkillId == null)
@@ -82,35 +86,35 @@ namespace SkillfullAPI.Controllers
         }
 
         [HttpPost]
-        [Route("deleteUserSkill")]
+        [Route("DeleteUserSkill")]
         public async Task<IActionResult> DeleteUserSkill([FromForm]int userSkillId)
         {
             if(userSkillId == null)
             {
                 return BadRequest("Invalid request");
             }
-            await _userSkillsData.DeleteUserSkills(userSkillId);
+            await _userSkillsData.DeleteUserSkill(userSkillId);
             return Ok("Record deleted permanently.");
         }
 
         [HttpPost]
-        [Route("addUserSkillTask")]
-        public async Task<IActionResult> AddUserSkillTask([FromForm] string userId, [FromForm] UserSkillTaskModel userSkillTaskModel)
+        [Route("AddTask")]
+        public async Task<IActionResult> AddUserSkillTask([FromForm] string userId, [FromForm] TaskModel taskModel)
         {
             if (ModelState.IsValid && !string.IsNullOrEmpty(userId))
             {
-                UserSkillTaskDataModel userSkillTask = new UserSkillTaskDataModel()
+                TaskDataModel userSkillTask = new TaskDataModel()
                 {
-                    Name = userSkillTaskModel.TaskName,
-                    Description = userSkillTaskModel.TaskDescription,
-                    StatusId = userSkillTaskModel.TaskStatusId,
-                    UserSkillId = userSkillTaskModel.UserSkillId,
-                    UserSkillName = userSkillTaskModel.UserSkillName,
+                    Name = taskModel.TaskName,
+                    Description = taskModel.TaskDescription,
+                    StatusId = taskModel.TaskStatusId,
+                    UserSkillId = taskModel.UserSkillId,
+                    UserSkillName = taskModel.UserSkillName,
                     UserId = userId
                 };
                 try
                 {
-                    await _userSkillsData.AddUserSkillTask(userId, userSkillTask);
+                    await _userSkillsData.AddTask(userId, userSkillTask);
                 }
                 catch(Exception ex)
                 {
@@ -125,23 +129,24 @@ namespace SkillfullAPI.Controllers
         }
 
         [HttpGet]
-        [Route("getAllUserSkillTasksPerUser")]
-        public async Task<List<UserSkillTaskModel>> GetAllUserSkillTasksPerUser(string userId)
+        [Route("GetAllTasksByUserId")]
+        public async Task<List<TaskModel>> GetAllTasksForUserId(string userId)
         {
             if (string.IsNullOrEmpty(userId))
             {
                 return null;
             }
-            var result = _userSkillsData.GetUserSkillTasksPerUser(userId).ToList();
-            List<UserSkillTaskModel> userSkillTasks = new List<UserSkillTaskModel>();
+            var result = _userSkillsData.GetTasksByUserId(userId).ToList();
+            List<TaskModel> userSkillTasks = new List<TaskModel>();
             if (result.Count == 0)
             {
                 return null;
             }
             foreach (var item in result)
             {
-                userSkillTasks.Add(new UserSkillTaskModel()
+                userSkillTasks.Add(new TaskModel()
                 {
+                    TaskId = item.Id,
                     TaskStatusId = item.StatusId,
                     TaskName = item.Name,
                     TaskCreatedDate = item.CreatedDate,
@@ -155,23 +160,24 @@ namespace SkillfullAPI.Controllers
         }
 
         [HttpGet]
-        [Route("getAllUserSkillTasksPerSkill")]
-        public async Task<List<UserSkillTaskModel>> GetAllUserSkillTasksPerSkill(string userSkillId)
+        [Route("GetAllTasksByUserSkillId")]
+        public async Task<List<TaskModel>> GetAllTasksByUserSkillId(string userSkillId)
         {
             if (string.IsNullOrEmpty(userSkillId))
             {
                 return null;
             }
-            var result = _userSkillsData.GetUserSkillTasksPerSkill(userSkillId).ToList();
-            List<UserSkillTaskModel> userSkillTasks = new List<UserSkillTaskModel>();
+            var result = _userSkillsData.GetTasksForUserSkillId(userSkillId).ToList();
+            List<TaskModel> userSkillTasks = new List<TaskModel>();
             if (result.Count == 0)
             {
                 return null;
             }
             foreach (var item in result)
             {
-                userSkillTasks.Add(new UserSkillTaskModel()
+                userSkillTasks.Add(new TaskModel()
                 {
+                    TaskId = item.Id,
                     TaskStatusId = item.StatusId,
                     TaskName = item.Name,
                     TaskCreatedDate = item.CreatedDate,
@@ -179,23 +185,23 @@ namespace SkillfullAPI.Controllers
                     TaskDescription = item.Description,
                     UserSkillId = item.UserSkillId
 
-                });
+                }) ;
             }
             return userSkillTasks;
         }
 
         [HttpPost]
-        [Route("updateUserSkillTask")]
-        public async Task<IActionResult> UpdateUserSkillTask(UserSkillTaskModel userSkillTask, int userSkillTaskId)
+        [Route("ModifyTask")]
+        public async Task<IActionResult> ModifyTask([FromForm]UpdateUserSkillTaskModel userSkillTask)
         {
             if(ModelState.IsValid)
             {
-                await _userSkillsData.UpdateUserSkillTasks(new UserSkillTaskDataModel
+                await _userSkillsData.ModifyTask(new TaskDataModel
                 {
-                    Id = userSkillTaskId,
-                    StatusId = userSkillTask.TaskStatusId,
-                    Name = userSkillTask.TaskName,
-                    Description = userSkillTask.TaskDescription,
+                    Id = userSkillTask.UserSkillTaskId,
+                    StatusId = userSkillTask.NewTaskStatusId,
+                    Name = userSkillTask.NewTaskName,
+                    Description = userSkillTask.NewTaskDescription,
                     ModifiedDate = DateTime.UtcNow
                 });
                 return Ok("Updated successfully");
@@ -204,14 +210,14 @@ namespace SkillfullAPI.Controllers
         }
 
         [HttpPost]
-        [Route("deleteUserSkillTask")]
-        public async Task<IActionResult> DeleteUserSkillTask(int userSkillTaskId)
+        [Route("DeleteTask")]
+        public async Task<IActionResult> DeleteTask(int userSkillTaskId)
         {
             if(userSkillTaskId == null)
             {
                 return BadRequest();
             }
-            await _userSkillsData.DeleteUserSkillTasks(userSkillTaskId);
+            await _userSkillsData.DeleteTask(userSkillTaskId);
             return Ok();
         }
     }

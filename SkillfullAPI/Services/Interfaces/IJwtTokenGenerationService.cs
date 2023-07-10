@@ -8,5 +8,6 @@ namespace SkillfullAPI.Services.Interfaces
     {
         Task<AuthResultModel> GenerateJwtToken(IdentityUser user);
         Task<AuthResultModel> VerifyAndGenerateToken(TokenRequestDto tokenRequest);
+        Task<bool> IsTokenValid(string token); 
     }
 }

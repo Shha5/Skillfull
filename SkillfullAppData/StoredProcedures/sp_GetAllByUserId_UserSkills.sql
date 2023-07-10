@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[sp_GetAllForId_UserSkills]
+﻿CREATE PROCEDURE [dbo].[sp_GetAllByUserId_UserSkills]
 	@userId NVARCHAR(50)
 AS
 BEGIN

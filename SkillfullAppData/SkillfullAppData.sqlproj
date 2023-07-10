@@ -63,17 +63,17 @@
   <ItemGroup>
     <Build Include="Tables\UserSkills.sql" />
     <Build Include="Tables\SkillAssessments.sql" />
-    <Build Include="Tables\UserSkillTasks.sql" />
+    <Build Include="Tables\Tasks.sql" />
     <Build Include="Tables\TaskStatus.sql" />
-    <Build Include="StoredProcedures\sp_GetAllForId_UserSkills.sql" />
+    <Build Include="StoredProcedures\sp_GetAllByUserId_UserSkills.sql" />
     <Build Include="StoredProcedures\sp_Add_UserSkills.sql" />
     <Build Include="StoredProcedures\sp_Update_UserSkills.sql" />
-    <Build Include="StoredProcedures\sp_Add_UserSkillTasks.sql" />
-    <Build Include="StoredProcedures\sp_Update_UserSkillTasks.sql" />
-    <Build Include="StoredProcedures\sp_GetAllForIdPerUser_UserSkillTasks.sql" />
+    <Build Include="StoredProcedures\sp_Add_Tasks.sql" />
+    <Build Include="StoredProcedures\sp_Modify_Tasks.sql" />
+    <Build Include="StoredProcedures\sp_GetAllByUserId_Tasks.sql" />
     <Build Include="StoredProcedures\sp_Delete_UserSkills.sql" />
-    <Build Include="StoredProcedures\sp_Delete_UserSkillTasks.sql" />
-    <Build Include="StoredProcedures\sp_GetAllForId_UserSkillTasks.sql" />
+    <Build Include="StoredProcedures\sp_Delete_Tasks.sql" />
+    <Build Include="StoredProcedures\sp_GetAllByUserSkillId_Tasks.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\SkillfullAppData.publish.xml" />

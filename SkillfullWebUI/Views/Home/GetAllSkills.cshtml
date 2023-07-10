@@ -1,4 +1,6 @@
-﻿@using SkillfullWebUI.Models.SkillModels;
+﻿@using SkillfullWebUI.Constants;
+@using SkillfullWebUI.Models.AuthModels;
+@using SkillfullWebUI.Models.SkillModels;
 @using System.Net;
 @model List<SkillModel>
 
@@ -14,7 +16,7 @@
             <h4 class="card-title">@skill.Name</h4>
 
             <a class="btn btn-primary" href="@Url.Action("GetSkillDetails", "Home", new {skillId = skill.Id})">Learn More</a>
-            @if (Context.Request.Cookies.ContainsKey("refreshToken"))
+            @if (Context.Request.Cookies.ContainsKey(CookieNames.UserId))
             {
                 
                 <a class="btn btn-primary" href="@Url.Action("AddUserskill", "UserSkills", new {skillId = WebUtility.UrlEncode(skill.Id), skillName = WebUtility.UrlEncode(skill.Name)})">Add</a>
@@ -28,5 +30,4 @@
     </div>
 }
 
->
 

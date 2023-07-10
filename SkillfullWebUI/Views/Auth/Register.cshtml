@@ -1,11 +1,11 @@
 ﻿@using SkillfullWebUI.Models.AuthModels;
 @model RegistrationRequestModel
 
-<h1 class="text-info">Sign up</h1>
+@*<h1 class="text-info">Sign up</h1>
 <form asp-controller="Auth" asp-action="Register" method="post" role="form">
     <h4>Create a new account</h4>
     <div class="alert-danger" name="ErrorMessage">@ViewBag.ErrorMessage</div>
-    <hr/>
+    <hr />
     <div class="form-group">
         <label asp-for="Email" class="col-md-2"></label>
         <div class="col-md-10">
@@ -39,4 +39,76 @@
             <button type="submit" class="btn btn-success">Sign up</button>
         </div>
     </div>
-    </form>
+</form>*@
+
+
+<section class="vh-100">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col col-xl-10">
+                <div class="card" style="border-radius: 1rem;">
+                    <div class="row g-0">
+                        <div class="col-md-6 col-lg-5 d-none d-md-block  card-image" style="border-radius:  1rem 0 0 1rem;">
+                        </div>
+                        <div class="col-md-6 col-lg-7 d-flex align-items-center">
+                            <div class="card-body p-4 p-lg-5 text-black">
+                                <form asp-controller="Auth" asp-action="Register" method="post" role="form" novalidate>
+
+                                    <div class="d-flex align-items-center mb-3 pb-1">
+                                        <span class="h1 fw-bold mb-0">Sign up</span>
+                                    </div>
+
+                                    <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Welcome to Skillfull!</h5>
+                                    <div class="error-info">
+                                        <span class="alert-danger">@ViewBag.ErrorMessage</span>
+                                    </div>
+                                    <div class="form-outline mb-4">
+                                        <input type="email" asp-for="Email" class="form-control form-control-lg" />
+                                        <label class="form-label">Email address</label>
+                                        <div class="error-info alert-danger"><span asp-validation-for="Email"></span></div>
+                                    </div>
+                                    <div class="form-outline mb-4">
+                                        <input type="text" asp-for="Name" class="form-control form-control-lg" />
+                                        <label class="form-label">Unique username</label>
+                                        <div class="error-info alert-danger"><span asp-validation-for="Name"></span></div>
+                                    </div>
+                                    <div class="form-outline mb-4">
+                                        <input type="password" asp-for="Password" class="form-control form-control-lg" />
+                                        <label class="form-label">Password</label>
+                                        <div class="error-info alert-danger"><span asp-validation-for="Password"></span></div>
+                                        <div><a class="small text-muted" asp-controller="Auth" asp-action="ForgotPassword">Forgot password?</a></div>
+                                    </div>
+
+                                    <div class="form-outline mb-4">
+                                        <input type="password" asp-for="ConfirmPassword" class="form-control form-control-lg" />
+                                        <label class="form-label">Confirm password</label>
+                                        <div class="error-info alert-danger"><span asp-validation-for="ConfirmPassword"></span></div>
+                       
+                                    </div>
+
+                                    
+
+                                    <div class="pt-1 mb-4">
+                                        <button class="btn auth-btn btn-lg btn-block" type="submit">Sign up</button>
+                                    </div>
+
+
+                                    <p class="mb-5 pb-lg-2" style="color: #393f81;">
+                                        Already have an account? <a asp-controller="Auth" asp-action="Login"
+                                                                  style="color: #393f81;">Login here</a>
+                                    </p>
+                                    <a href="#!" class="small text-muted">Terms of use.</a>
+                                    <a asp-action="Privacy" asp-controller="Home" class="small text-muted">Privacy policy</a>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+   

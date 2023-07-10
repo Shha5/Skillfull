@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using SkillfullWebUI.Constants;
+@using SkillfullWebUI.Models.AuthModels;
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,80 +9,87 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SkillfullWebUI.styles.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SkillfullWebUI</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light box-shadow m-0">
+            <div class="container-fluid ps-3 pe-3">
+                <!--BRANDING AND HOME ACTION LINK-->
+                <div class="brand-elements order-1">
+                <a class="navbar-brand app-name" asp-controller="Home" asp-action="Index"><img src="~/assets/icons/app-logo.png" class="app-logo" /></a>
+                <a class="navbar-brand app-name" asp-controller="Home" asp-action="Index">Skillfull</a>
+                </div>
+@*                <!--HAMBURGER MENU-->
+                <div class="center-wrapper order-2">
+                    <button class="navbar-toggler order-2" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler"><img class="menu-icon" src="~/assets/icons/menu-svgrepo-com.svg" /></span>
+                    </button>*@
+              @*  <!--MENU ITEMS-->
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="GetAllSkills">Browse skills</a>
                         </li>
-
-                        @if (Context.Request.Cookies.ContainsKey("refreshToken"))
+                        </ul>
+                        </div>
+                    </div>*@
+                   
+                    <div class="right-wrapper d-flex order-2">
+                        <!--USER LOGGED IN-->
+                        @if (Context.Request.Cookies.ContainsKey(CookieNames.UserId))
                         {
-                            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDarkDropdown" aria-controls="navbarNavDarkDropdown" aria-expanded="false" aria-label="Toggle navigation">
-                                <span class="navbar-toggler-icon"></span>
-                            </button>
-                            <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
-                                <ul class="navbar-nav">
+                            <div class="collapse navbar-collapse ms-auto" id="navbarNavDarkDropdown">
+                               
                                     <li class="nav-item dropdown">
-                                        <a class="nav-link dropdown-toggle" href="#" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            @Context.Request.Cookies["Username"];
+                                        <a class="nav-link" href="#" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <img src="~/assets/icons/profile.svg" class="profile"/>
                                         </a>
-                                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDarkDropdownMenuLink">
                                             <li><a class="dropdown-item" asp-controller="UserSkills" asp-action="GetAllUserSkills">Show my skills</a></li>
                                             <li><a class="dropdown-item" asp-controller="UserSkills" asp-action="GetAllUserSkillTasks_User">Show my tasks</a></li>
-                                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Auth" asp-action="Logout">Logout</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Auth" asp-action="ChangePassword">Change password</a></li>
                                         </ul>
                                     </li>
-                                </ul>
-                            </div>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Logout">Logout</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="ChangePassword">Change password</a>
-                            </li>
+                             
+                            </div> 
                         }
-                        @if (!Context.Request.Cookies.ContainsKey("refreshToken"))
+                        <!--USER NOT LOGGED IN-->
+                        @if (!Context.Request.Cookies.ContainsKey(CookieNames.UserId))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Register">Sign up</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Login">Log in</a>
-                            </li>
+                        <a class="btn" asp-controller="Auth" asp-action="Register">Sign up </a>
+
+                        <a class="btn" asp-controller="Auth" asp-action="Login">Log in</a>
                         }
-                    </ul>
+                    </div>
                 </div>
             </div>
         </nav>
+
+
+
     </header>
-    <div class="container">
+    <div class="container-fluid p-0 g-0">
         <partial name="_CookieConsentPartial" />
-        <main role="main" class="pb-3">
+        <main role="main" class="p-0">
             @RenderBody()
+            
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2023 - SkillfullWebUI - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="border-top footer text-muted p-0 g-0">
+        <div class="container p-0 g-0">
+            &copy; @DateOnly.FromDateTime(DateTime.UtcNow).Year - Skillfull - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

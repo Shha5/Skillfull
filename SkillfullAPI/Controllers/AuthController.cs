@@ -45,9 +45,18 @@ namespace SkillfullAPI.Controllers
             {
                 return Ok();
             }
+            else if(result.Errors.Any())
+            {
+                List<string> errors = new List<string>();
+                foreach (var error in result.Errors)
+                {
+                    errors.Add(error.ToString());
+                }
+                return BadRequest(new AuthResultModel() { Result = false, Errors = errors });
+            }
             else
             {
-                return BadRequest(new AuthResultModel() { Result = false, Errors = new List<string>() { "Failed to confirm email address." } });
+                return BadRequest(new AuthResultModel() { Result = false, Errors = new List<string>() { "Unspecified error occured." } });
             }
         }
 
@@ -58,23 +67,22 @@ namespace SkillfullAPI.Controllers
             if(ModelState.IsValid) 
             {
                 var user = await _userManager.FindByIdAsync(passwordChangeRequest.UserId);
-                
-                   var result = await _userManager.ChangePasswordAsync(user, passwordChangeRequest.CurrentPassword, passwordChangeRequest.NewPassword);
-                    if (result.Succeeded)
+                var result = await _userManager.ChangePasswordAsync(user, passwordChangeRequest.CurrentPassword, passwordChangeRequest.NewPassword);
+                if (result.Succeeded)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(new AuthResultModel()
                     {
-                        return Ok();
-                    }
-                    else
-                    {
-                        return BadRequest(new AuthResultModel()
+                        Result = false,
+                        Errors = new List<string>()
                         {
-                            Result = false,
-                            Errors = new List<string>()
-                            {
                                 result.Errors.ToString()
-                            }
-                        });
-                    }  
+                        }
+                    });
+                }  
             }
             else
             {
@@ -87,6 +95,18 @@ namespace SkillfullAPI.Controllers
                     }
                 });
             }
+        }
+
+        [HttpPost]
+        [Route("CheckIfTokenIsValid")]
+        public  async Task<IActionResult> CheckIfTokenIsValid([FromForm]string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                return BadRequest("No token was provided");
+            }
+            var result = await _jwtTokenGenerationService.IsTokenValid(token);
+            return Ok(result);
         }
 
         [HttpPost]
@@ -136,7 +156,7 @@ namespace SkillfullAPI.Controllers
                         Result = false,
                         Errors = new List<string>()
                         {
-                            "Invalid payload"
+                            "Invalid credentials"
                         }
                     });
                 }
@@ -168,14 +188,14 @@ namespace SkillfullAPI.Controllers
                 Result = false,
                 Errors = new List<string>()
                 {
-                    "Invalid payload"
+                    "Invalid credentials"
                 }
             });
         }
 
         [HttpPost]
         [Route("RefreshToken")]
-        public async Task<IActionResult> RefreshToken([FromBody] TokenRequestDto tokenRequest)
+        public async Task<IActionResult> RefreshToken([FromForm] TokenRequestDto tokenRequest)
         {
             if (ModelState.IsValid)
             {
@@ -349,7 +369,7 @@ namespace SkillfullAPI.Controllers
                     Result = false,
                     Errors = new List<string>()
                     {
-                        "Failed to confirm email"
+                        "Failed to reset password"
                     }
                 });
             }

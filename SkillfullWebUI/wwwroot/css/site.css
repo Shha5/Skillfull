@@ -1,11 +1,15 @@
-html {
-  font-size: 14px;
+
+:root {
+    --app-name-font-family: 3rem "Poppins";
+    --headers-font-family: "Montserrat";
+    --headers-font-weight: 700;
+    --body-copy-font-family: "Montserrat";
+
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+main {
+    min-height: 95vh;
+
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
@@ -13,15 +17,69 @@ html {
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
+   
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    font-family: var(--body-copy-font-family);
+
 }
 
 .tooltip-icon{
     max-height: 20px;
     max-width: 20px;
 }
+
+
+
+.app-name{
+    font-family: var(--app-name-font-family);
+    font-size: 3rem;
+    font-weight: 600;
+    margin: 0;
+    padding: 0;
+}
+
+.app-logo{
+    margin: 0;
+    height: 45px;
+    padding-bottom: 12px;
+}
+
+.profile{
+    max-height: 25px;
+}
+
+h1, h2, h3, h4, h5, h6{
+    font-family: var(--headers-font-family);
+    font-weight: var(--headers-font-weight);
+}
+.navbar-toggler{
+    max-height: 32px;
+    max-height: 40px;
+    border: none;
+    outline: 1px solid transparent; 
+}
+.menu-icon{
+    max-height: 30px;
+    max-width: 30px;
+    display: inline-block;
+}
+
+
+.card-image {
+    min-height: 100%;
+    background: hsla(270, 100%, 50%, 1);
+    background: linear-gradient(135deg, hsla(270, 100%, 50%, 1) 0%, hsla(49, 100%, 76%, 1) 81%);
+    background: -moz-linear-gradient(135deg, hsla(270, 100%, 50%, 1) 0%, hsla(49, 100%, 76%, 1) 81%);
+    background: -webkit-linear-gradient(135deg, hsla(270, 100%, 50%, 1) 0%, hsla(49, 100%, 76%, 1) 81%);
+    filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#8000FF", endColorstr="#FFE884", GradientType=1 );
+}
+
+.auth-btn {
+    background: #E457BE;
+}
+

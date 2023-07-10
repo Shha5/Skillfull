@@ -5,6 +5,16 @@
 @if(Model != null && Model.Count > 0){
     @foreach(var task in Model)
     {
-        <h2>@task.TaskName</h2>
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">@task.TaskName</h4>
+                <p>Status: @task.TaskStatusId</p>
+                <span><img class="tooltip-icon" src="~/assets/information.png" data-bs-toggle="tooltip" data-bs-placement="right" title="1 - Not started; 2 - In progress; 3 - Done" /></span>
+
+                <a class="btn btn-primary" href="@Url.Action("UpdateUserSkillTask", "UserSkills", new {userSkillTaskId = task.TaskId, taskName = task.TaskName})">Update</a>
+                <a class="btn btn-primary" href="@Url.Action("DeleteUserSkillTask", "UserSkills", new {userSkillTaskId = task.TaskId})">Delete</a>
+
+            </div>
+        </div>
     }
 }

@@ -1,8 +1,7 @@
-﻿using DataAccessLibrary.Models;
-
+﻿
 namespace SkillfullAPI.Models.AppModels
 {
-    public class UserSkillTaskModel
+    public class TaskModel
     {
         public int? TaskId { get; set; } = null;
         public string TaskName { get; set; }

@@ -2,7 +2,7 @@
 
 namespace SkillfullWebUI.Models.UserSkillsModels
 {
-    public class AddUserSkillModel
+    public class AddUserSkillViewModel
     {
         [Required]
         public string SkillId { get; set; }
