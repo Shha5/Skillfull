@@ -1,8 +1,9 @@
 ﻿@using SkillfullWebUI.Models.UserSkillsModels;
-@model List<UserSkillTaskModel>
+@model List<TaskModel>
 
+    @ViewBag.InfoMessage
 
-@if(Model != null && Model.Count > 0){
+@if(Model != null && Model.Count >0){
     @foreach(var task in Model)
     {
         <div class="card">

@@ -133,7 +133,7 @@ namespace SkillfullWebUI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddUserSkillTask(AddUserSkillTaskModel addUserSkillTask)
+        public async Task<IActionResult> AddUserSkillTask(AddTaskModel addUserSkillTask)
         {
             if (!ModelState.IsValid)
             {
@@ -202,12 +202,12 @@ namespace SkillfullWebUI.Controllers
             {
                 return View("Error");
             }
-            UpdateUserSkillTaskModel updateUserSkillTask = new UpdateUserSkillTaskModel();
+            ModifyTaskModel updateUserSkillTask = new ModifyTaskModel();
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> ModifyTask([FromForm]UpdateUserSkillTaskModel updateTask)
+        public async Task<IActionResult> ModifyTask([FromForm]ModifyTaskModel updateTask)
         {
             if (!ModelState.IsValid)
             {

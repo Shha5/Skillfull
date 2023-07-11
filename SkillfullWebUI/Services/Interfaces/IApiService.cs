@@ -25,10 +25,10 @@ namespace SkillfullWebUI.Services.Interfaces
         Task<ApiServiceGetResponseModel<List<UserSkillModel>>> GetAllUserSkills();
         Task<ApiServicePostResponseModel> UpdateUserSkill(string userSkillId, string newSkillAssessmentId);
         Task<ApiServicePostResponseModel> DeleteUserSkill(string userSkillId);
-        Task<ApiServicePostResponseModel> AddTask(AddUserSkillTaskModel addUserSkillTask);
-        Task<ApiServiceGetResponseModel<List<UserSkillTaskModel>>> GetAllTasksByUserId();
-        Task<ApiServiceGetResponseModel<List<UserSkillTaskModel>>> GetAllTasksByUserSkillId(string userSkillId);
-        Task<ApiServicePostResponseModel> ModifyTask(UpdateUserSkillTaskModel updateUserSkillTask);
+        Task<ApiServicePostResponseModel> AddTask(AddTaskModel addUserSkillTask);
+        Task<ApiServiceGetResponseModel<List<TaskModel>>> GetAllTasksByUserId();
+        Task<ApiServiceGetResponseModel<List<TaskModel>>> GetAllTasksByUserSkillId(string userSkillId);
+        Task<ApiServicePostResponseModel> ModifyTask(ModifyTaskModel updateUserSkillTask);
         Task<ApiServicePostResponseModel> DeleteTask(string userSkillTaskId);
     }
 }

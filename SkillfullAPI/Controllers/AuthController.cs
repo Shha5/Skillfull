@@ -79,7 +79,7 @@ namespace SkillfullAPI.Controllers
                         Result = false,
                         Errors = new List<string>()
                         {
-                                result.Errors.ToString()
+                            result.Errors.ToString()
                         }
                     });
                 }  

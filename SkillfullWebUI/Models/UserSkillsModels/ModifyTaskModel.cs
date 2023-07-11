@@ -1,6 +1,6 @@
 ﻿namespace SkillfullWebUI.Models.UserSkillsModels
 {
-    public class UpdateUserSkillTaskModel
+    public class ModifyTaskModel
     {
         public string UserSkillTaskId { get; set; }
         public string NewTaskName { get; set; }

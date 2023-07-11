@@ -436,7 +436,7 @@ namespace SkillfullWebUI.Services
             };
         }
 
-        public async Task<ApiServicePostResponseModel> AddTask(AddUserSkillTaskModel addUserSkillTask)
+        public async Task<ApiServicePostResponseModel> AddTask(AddTaskModel addUserSkillTask)
         {
             var cookieVerification = await VerifyAndRefreshCookies();
             if (cookieVerification.Result == false)
@@ -475,12 +475,12 @@ namespace SkillfullWebUI.Services
         }
 
 
-        public async Task<ApiServiceGetResponseModel<List<UserSkillTaskModel>>> GetAllTasksByUserId()
+        public async Task<ApiServiceGetResponseModel<List<TaskModel>>> GetAllTasksByUserId()
         {
             var cookieVerification = await VerifyAndRefreshCookies();
             if (cookieVerification.Result == false)
             {
-                return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>()
+                return new ApiServiceGetResponseModel<List<TaskModel>>()
                 {
                     Result = false,
                     ErrorMessage = cookieVerification.ErrorMessage,
@@ -493,7 +493,7 @@ namespace SkillfullWebUI.Services
            var response = await _apiClient.GetAsync(url);
             if(response.IsSuccessStatusCode == false)
             {
-                return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>() 
+                return new ApiServiceGetResponseModel<List<TaskModel>>() 
                 {
                     Result = false,
                     ErrorMessage = response.StatusCode.ToString()
@@ -501,7 +501,7 @@ namespace SkillfullWebUI.Services
             }
             if (response.IsSuccessStatusCode && response.Content == null)
             {
-                return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>()
+                return new ApiServiceGetResponseModel<List<TaskModel>>()
                 {
                     Result = true,
                     ErrorMessage = "No content",
@@ -509,8 +509,8 @@ namespace SkillfullWebUI.Services
                 };
             }
             string responseString = await response.Content.ReadAsStringAsync();
-            var result = await DeserializeApiResponseAsync<List<UserSkillTaskModel>>(responseString);
-            return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>() 
+            var result = await DeserializeApiResponseAsync<List<TaskModel>>(responseString);
+            return new ApiServiceGetResponseModel<List<TaskModel>>() 
             {
                 Result = true,
                 ErrorMessage = null,
@@ -518,12 +518,12 @@ namespace SkillfullWebUI.Services
             };
         }
 
-        public async Task<ApiServiceGetResponseModel<List<UserSkillTaskModel>>> GetAllTasksByUserSkillId(string userSkillId)
+        public async Task<ApiServiceGetResponseModel<List<TaskModel>>> GetAllTasksByUserSkillId(string userSkillId)
         {
             var cookieVerification = await VerifyAndRefreshCookies();
             if (cookieVerification.Result == false)
             {
-                return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>()
+                return new ApiServiceGetResponseModel<List<TaskModel>>()
                 {
                     Result = false,
                     ErrorMessage = cookieVerification.ErrorMessage,
@@ -537,7 +537,7 @@ namespace SkillfullWebUI.Services
             var response = await _apiClient.GetAsync(url); 
             if(response.IsSuccessStatusCode == false)
             {
-                return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>()
+                return new ApiServiceGetResponseModel<List<TaskModel>>()
                 {
                     Result = false,
                     ErrorMessage = response.StatusCode.ToString(),
@@ -546,7 +546,7 @@ namespace SkillfullWebUI.Services
             }
             if(response.IsSuccessStatusCode && response.Content == null)
             {
-                return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>()
+                return new ApiServiceGetResponseModel<List<TaskModel>>()
                 {
                     Result = true,
                     ErrorMessage = "No content",
@@ -554,8 +554,8 @@ namespace SkillfullWebUI.Services
                 };
             }
             string responseString = await response.Content.ReadAsStringAsync();
-            var result = await DeserializeApiResponseAsync<List<UserSkillTaskModel>>(responseString);
-            return new ApiServiceGetResponseModel<List<UserSkillTaskModel>>()
+            var result = await DeserializeApiResponseAsync<List<TaskModel>>(responseString);
+            return new ApiServiceGetResponseModel<List<TaskModel>>()
             {
                 Result = true,
                 ErrorMessage = null,
@@ -563,7 +563,7 @@ namespace SkillfullWebUI.Services
             };
         }
 
-        public async Task<ApiServicePostResponseModel> ModifyTask(UpdateUserSkillTaskModel updateUserSkillTask)
+        public async Task<ApiServicePostResponseModel> ModifyTask(ModifyTaskModel updateUserSkillTask)
         {
             var cookieVerification = await VerifyAndRefreshCookies();
             if (cookieVerification.Result == false)
