@@ -192,7 +192,7 @@ namespace SkillfullAPI.Controllers
 
         [HttpPost]
         [Route("ModifyTask")]
-        public async Task<IActionResult> ModifyTask([FromForm]UpdateUserSkillTaskModel userSkillTask)
+        public async Task<IActionResult> ModifyTask([FromForm]ModifyTaskModel userSkillTask)
         {
             if(ModelState.IsValid)
             {

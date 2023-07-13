@@ -1,6 +1,6 @@
 ﻿namespace SkillfullAPI.Models.AppModels
 {
-    public class UpdateUserSkillTaskModel
+    public class ModifyTaskModel
     {
         public int UserSkillTaskId { get; set; }
         public string NewTaskName { get; set; }

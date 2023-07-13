@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SkillfullAPI.Data;
@@ -68,6 +69,7 @@ client.BaseAddress = new Uri("https://emsiservices.com/skills/versions/latest/")
 
 builder.Services.AddTransient<ISendGridEmailService, SendGridEmailService>();
 builder.Services.AddScoped<IJwtTokenGenerationService, JwtTokenGenerationService>();
+builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ISqlDataAccess, SqlDataAccess>();
 builder.Services.AddSingleton<IUserSkillsData, UserSkillsData>();
 builder.Services.AddControllers();

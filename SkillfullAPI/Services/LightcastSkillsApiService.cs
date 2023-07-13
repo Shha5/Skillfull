@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
 using SkillfullAPI.Models.LightcastApiModels;
 using SkillfullAPI.Services.Interfaces;
 using System.Net.Http.Headers;
@@ -7,17 +8,21 @@ namespace SkillfullAPI.Services
 {
     public class LightcastSkillsApiService : ILightcastSkillsApiService
     {
+        private const string LightcastTokenCacheKey = "LightcastToken";
+        private static readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
         private readonly HttpClient _apiClient;
         private readonly HttpClient _authClient;
         private readonly IConfiguration _configuration;
         private readonly ILogger<LightcastSkillsApiService> _logger;
+        private IMemoryCache _memoryCache;
 
-        public LightcastSkillsApiService(HttpClient apiClient, HttpClient authClient, IConfiguration configuration, ILogger<LightcastSkillsApiService> logger)
+        public LightcastSkillsApiService(HttpClient apiClient, HttpClient authClient, IConfiguration configuration, ILogger<LightcastSkillsApiService> logger, IMemoryCache memoryCache)
         {
             _apiClient = apiClient;
             _authClient = authClient;
             _configuration = configuration;
             _logger = logger;
+            _memoryCache = memoryCache;
         }
 
         public async Task<T> GetLightcastSkillsData<T>(string? skillId = null) 
@@ -91,49 +96,75 @@ namespace SkillfullAPI.Services
 
         private async Task<LightcastAuthTokenModel> GetLightcastTokenAsync()
         {
-            var accessInfo = _configuration.GetSection("LightcastApi");
-
-            if (accessInfo == null)
+            LightcastAuthTokenModel token = new();
+            try
             {
-                _logger.LogInformation(nameof(LightcastSkillsApiService), $"Couldn't retrieve access information from secrets.json");
-                return null;
-            }
+                await semaphore.WaitAsync();
 
-            string clientId = accessInfo.GetValue<string>("ClientId");
-            string secret = accessInfo.GetValue<string>("Secret");
-            string scope = accessInfo.GetValue<string>("Scope");
 
-            var values = new Dictionary<string, string>
-            {
-                 {"client_id", clientId },
-                 {"client_secret", secret},
-                 {"grant_type", "client_credentials"},
-                 {"scope", scope},
-            };
-
-            var requestContent = new FormUrlEncodedContent(values);
-            var response = await _authClient.PostAsync("https://auth.emsicloud.com/connect/token", requestContent);
-
-            if (response.IsSuccessStatusCode)
-            {
-                string responseAsString = await response.Content.ReadAsStringAsync();
-                if (string.IsNullOrEmpty(responseAsString))
+                if (_memoryCache.TryGetValue("LightcastToken", out LightcastAuthTokenModel value))
                 {
-                    return null;
+                    token = value;
+                    _logger.LogInformation(nameof(LightcastSkillsApiService), $"Token found in cache.");
                 }
 
-                LightcastAuthTokenModel token = await DeserializeApiResponseAsync<LightcastAuthTokenModel>(responseAsString);
-                if (token == null)
+                else
                 {
-                    return null;
+                    _logger.LogInformation(nameof(LightcastSkillsApiService), $"Token was not found in cache. Requesting new token from emsi.");
+
+
+                    var accessInfo = _configuration.GetSection("LightcastApi");
+                    if (accessInfo == null)
+                    {
+                        _logger.LogInformation(nameof(LightcastSkillsApiService), $"Couldn't retrieve access information from secrets.json");
+                        return null;
+                    }
+                    string clientId = accessInfo.GetValue<string>("ClientId");
+                    string secret = accessInfo.GetValue<string>("Secret");
+                    string scope = accessInfo.GetValue<string>("Scope");
+
+                    var values = new Dictionary<string, string>
+                    {
+                        {"client_id", clientId },
+                        {"client_secret", secret},
+                        {"grant_type", "client_credentials"},
+                        {"scope", scope},
+                    };
+
+                    var requestContent = new FormUrlEncodedContent(values);
+                    var response = await _authClient.PostAsync("https://auth.emsicloud.com/connect/token", requestContent);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseAsString = await response.Content.ReadAsStringAsync();
+                        if (string.IsNullOrEmpty(responseAsString))
+                        {
+                            return null;
+                        }
+                        token = await DeserializeApiResponseAsync<LightcastAuthTokenModel>(responseAsString);
+                    }
+                    var cacheEntryOptions = new MemoryCacheEntryOptions()
+                        .SetSlidingExpiration(TimeSpan.FromSeconds(1800))
+                        .SetAbsoluteExpiration(TimeSpan.FromSeconds(3540))
+                        .SetPriority(CacheItemPriority.Normal)
+                        .SetSize(1024);
+
+                    _memoryCache.Set("LightcastToken", token, cacheEntryOptions);
                 }
-                return token;
             }
-            else
+            finally
             {
-                _logger.LogInformation(nameof(LightcastSkillsApiService), $"Request to auth.emsicloud.com/connect/token returned {response.StatusCode}");
-                return null;
+                semaphore.Release();
             }
+            return token;
         }
+
+
+
+
+
+
+                    
+                
     }
 }
