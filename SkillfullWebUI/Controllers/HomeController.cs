@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using SkillfullWebUI.Models;
 using SkillfullWebUI.Models.SkillModels;
 using SkillfullWebUI.Services.Interfaces;
@@ -32,32 +33,44 @@ namespace SkillfullWebUI.Controllers
             return View();
         }
 
-        //[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        //public IActionResult Error()
-        //{
-        //    return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        //}
 
+        //TODO: work on pagination of search results
         [HttpGet]
-        public async Task<IActionResult> GetAllSkills(string? searchPhrase)
+        public async Task<IActionResult> GetAllSkills(string? searchPhrase, int pg = 1)
         {
+            const int pageSize = 20;
+            List<SkillModel> skills = new();
             var result = await _apiService.GetAllSkills();
             if(string.IsNullOrEmpty(searchPhrase))
             {
-                return View(result);
+                skills = result.Content;
+                if (pg < 1)
+                    pg = 1;
+                int recsCount = skills.Count();
+                var pager = new Pager(recsCount, pg, pageSize);
+                int recSkip = (pg - 1) * pageSize;
+                var data = skills.Skip(recSkip).Take(pager.PageSize).ToList();
+                this.ViewBag.Pager = pager;
+
+                return View(data);
             }
             else
             {
                 var searchResult = result.Content.Where(skill => skill.Name.ToLower().Contains(searchPhrase.ToLower())); 
-                return View(searchResult.ToList());
-            } 
+                skills = searchResult.ToList();
+                return View(skills);
+            }
+            
+
+            
+
         }
 
         [HttpGet]
         public async Task<IActionResult> GetSkillDetails(string? skillId)
         {
             var result = await _apiService.GetSkillDetailsById(skillId);
-            return View(result);
+            return View(result.Content);
         }
         
     }

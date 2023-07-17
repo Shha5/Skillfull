@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SkillfullWebUI.Constants;
 using SkillfullWebUI.Models.AuthModels;
 using SkillfullWebUI.Services.Interfaces;
 
@@ -49,7 +48,7 @@ namespace SkillfullWebUI.Controllers
             if (_cookieManager.AreAuthCookiesPresent() == true)
             {
                 ChangePasswordModel changePassword = new ChangePasswordModel();
-                return View();
+                return View(changePassword);
             }
             else
             {

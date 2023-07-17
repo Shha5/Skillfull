@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SkillfullAPI.Models.LightcastApiModels;
 using SkillfullAPI.Services.Interfaces;
 using System.Net.Http.Headers;
@@ -100,55 +101,20 @@ namespace SkillfullAPI.Services
             try
             {
                 await semaphore.WaitAsync();
-
-
                 if (_memoryCache.TryGetValue("LightcastToken", out LightcastAuthTokenModel value))
                 {
                     token = value;
                     _logger.LogInformation(nameof(LightcastSkillsApiService), $"Token found in cache.");
                 }
-
                 else
                 {
                     _logger.LogInformation(nameof(LightcastSkillsApiService), $"Token was not found in cache. Requesting new token from emsi.");
-
-
-                    var accessInfo = _configuration.GetSection("LightcastApi");
-                    if (accessInfo == null)
-                    {
-                        _logger.LogInformation(nameof(LightcastSkillsApiService), $"Couldn't retrieve access information from secrets.json");
-                        return null;
-                    }
-                    string clientId = accessInfo.GetValue<string>("ClientId");
-                    string secret = accessInfo.GetValue<string>("Secret");
-                    string scope = accessInfo.GetValue<string>("Scope");
-
-                    var values = new Dictionary<string, string>
-                    {
-                        {"client_id", clientId },
-                        {"client_secret", secret},
-                        {"grant_type", "client_credentials"},
-                        {"scope", scope},
-                    };
-
-                    var requestContent = new FormUrlEncodedContent(values);
-                    var response = await _authClient.PostAsync("https://auth.emsicloud.com/connect/token", requestContent);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string responseAsString = await response.Content.ReadAsStringAsync();
-                        if (string.IsNullOrEmpty(responseAsString))
-                        {
-                            return null;
-                        }
-                        token = await DeserializeApiResponseAsync<LightcastAuthTokenModel>(responseAsString);
-                    }
+                    token = await RequestLightcastToken();
                     var cacheEntryOptions = new MemoryCacheEntryOptions()
                         .SetSlidingExpiration(TimeSpan.FromSeconds(1800))
                         .SetAbsoluteExpiration(TimeSpan.FromSeconds(3540))
                         .SetPriority(CacheItemPriority.Normal)
                         .SetSize(1024);
-
                     _memoryCache.Set("LightcastToken", token, cacheEntryOptions);
                 }
             }
@@ -159,7 +125,41 @@ namespace SkillfullAPI.Services
             return token;
         }
 
+        private async Task<LightcastAuthTokenModel> RequestLightcastToken()
+        {
+            var accessInfo = _configuration.GetSection("LightcastApi");
+            if (accessInfo == null)
+            {
+                _logger.LogInformation(nameof(LightcastSkillsApiService), $"Couldn't retrieve access information from secrets.json");
+                return null;
+            }
+            string clientId = accessInfo.GetValue<string>("ClientId");
+            string secret = accessInfo.GetValue<string>("Secret");
+            string scope = accessInfo.GetValue<string>("Scope");
 
+            var values = new Dictionary<string, string>
+                    {
+                        {"client_id", clientId },
+                        {"client_secret", secret},
+                        {"grant_type", "client_credentials"},
+                        {"scope", scope},
+                    };
+
+            var requestContent = new FormUrlEncodedContent(values);
+            var response = await _authClient.PostAsync("https://auth.emsicloud.com/connect/token", requestContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseAsString = await response.Content.ReadAsStringAsync();
+                if (string.IsNullOrEmpty(responseAsString))
+                {
+                    return null;
+                }
+                var token = await DeserializeApiResponseAsync<LightcastAuthTokenModel>(responseAsString);
+                return token;
+            }
+            return null;
+        }
 
 
 

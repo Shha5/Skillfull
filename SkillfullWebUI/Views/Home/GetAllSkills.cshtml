@@ -4,6 +4,20 @@
 @using System.Net;
 @model List<SkillModel>
 
+@{
+    
+    Pager pager = new Pager();
+    int pageNo = 0;
+
+    if (ViewBag.Pager != null)
+    {
+        pager = ViewBag.Pager;
+        pageNo = pager.CurrentPage;
+    }
+}
+
+
+
 <form asp-controller="Home" asp-action="GetAllSkills" method="get" role="form">
     <input id="searchPhrase" name="searchPhrase" class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
     <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
@@ -29,5 +43,24 @@
         </div>
     </div>
 }
+
+<div class="row">
+    @if (pager.TotalPages > 0)
+    {
+        <div class="col-lg-12">
+
+            <div class="pagination mt-30">
+                <ul class="pagination mt-30">
+                    @for (var pge = pager.StartPage; pge <= pager.EndPage; pge++)
+                    {
+                        <li class="@(pge == pager.CurrentPage ? "active" : "")">
+                            <a asp-controller="Home" asp-action="GetAllSkills" asp-route-pg="@pge">@pge</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+</div>
 
 
