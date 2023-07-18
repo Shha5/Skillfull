@@ -39,16 +39,17 @@ namespace SkillfullWebUI.Controllers
         {
             const int pageSize = 20;
             List<SkillModel> skills = new();
+
             var result = await _apiService.GetAllSkills();
             if(string.IsNullOrEmpty(searchPhrase))
             {
-                skills = result.Content;
-                
+                skills = result.Content; 
             }
             else
             {
-               return RedirectToAction("SearchSkills", new {search = searchPhrase});
-                
+                var response = await _apiService.GetAllSkills();
+                var searchResult = response.Content.Where(skill => skill.Name.ToLower().Contains(searchPhrase.ToLower()));
+                skills = searchResult.ToList();  
             }
 
             if (pg < 1)
@@ -59,32 +60,10 @@ namespace SkillfullWebUI.Controllers
             var data = skills.Skip(recSkip).Take(pager.PageSize).ToList();
             this.ViewBag.Pager = pager;
 
-            return View(data);
-
-
+            return View(new GetAllSkillsViewModel() { SearchPhrase = searchPhrase, Skills = data });
         }
 
-        public async Task<IActionResult> SearchSkills(string search, int pg = 1)
-        {
-            const int pageSize = 20;
-            if (string.IsNullOrEmpty(search))
-            {
-                return RedirectToAction("GetAllSkills");
-            }
-            var response = await _apiService.GetAllSkills();
-            var searchResult = response.Content.Where(skill => skill.Name.ToLower().Contains(search.ToLower()));
-            var skills = searchResult.ToList();
-            if (pg < 1)
-                pg = 1;
-            int recsCount = skills.Count();
-            var pager = new Pager(recsCount, pg, pageSize);
-            int recSkip = (pg - 1) * pageSize;
-            var data = skills.Skip(recSkip).Take(pager.PageSize).ToList();
-            this.ViewBag.Pager = pager;
-
-            return View(new SearchAllSkillsViewModel() { SearchPhrase = search, Skills = data });
-
-        }
+       
 
         [HttpGet]
         public async Task<IActionResult> GetSkillDetails(string? skillId)
