@@ -2,10 +2,10 @@
 @using SkillfullWebUI.Models.AuthModels;
 @using SkillfullWebUI.Models.SkillModels;
 @using System.Net;
-@model List<SkillModel>
+@model SearchAllSkillsViewModel
 
 @{
-    
+
     Pager pager = new Pager();
     int pageNo = 0;
 
@@ -16,14 +16,14 @@
     }
 }
 
-<form asp-controller="Home" asp-action="GetAllSkills" method="get" role="form">
-    <input id="searchPhrase" name="searchPhrase" class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+<form asp-controller="Home" asp-action="SearchSkills" method="get" role="form">
+    <input id="search" name="search" class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
     <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
 </form>
 
 
 
-@foreach(SkillModel skill in Model)
+@foreach (SkillModel skill in Model.Skills)
 {
     <div class="card">
         <div class="card-body">
@@ -32,7 +32,7 @@
             <a class="btn btn-primary" href="@Url.Action("GetSkillDetails", "Home", new {skillId = skill.Id})">Learn More</a>
             @if (Context.Request.Cookies.ContainsKey(CookieNames.UserId))
             {
-                
+
                 <a class="btn btn-primary" href="@Url.Action("AddUserskill", "UserSkills", new {skillId = WebUtility.UrlEncode(skill.Id), skillName = WebUtility.UrlEncode(skill.Name)})">Add</a>
             }
             else
@@ -54,7 +54,7 @@
                     @for (var pge = pager.StartPage; pge <= pager.EndPage; pge++)
                     {
                         <li class="@(pge == pager.CurrentPage ? "active" : "")">
-                            <a asp-controller="Home" asp-action="GetAllSkills"  asp-route-pg="@pge">@pge</a>
+                            <a asp-controller="Home" asp-action="SearchSkills" asp-route-search="@Model.SearchPhrase" asp-route-pg="@pge">@pge</a>
                         </li>
                     }
                 </ul>
@@ -62,5 +62,3 @@
         </div>
     }
 </div>
-
-

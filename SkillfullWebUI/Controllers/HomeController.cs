@@ -34,7 +34,6 @@ namespace SkillfullWebUI.Controllers
         }
 
 
-        //TODO: work on pagination of search results
         [HttpGet]
         public async Task<IActionResult> GetAllSkills(string? searchPhrase, int pg = 1)
         {
@@ -44,25 +43,46 @@ namespace SkillfullWebUI.Controllers
             if(string.IsNullOrEmpty(searchPhrase))
             {
                 skills = result.Content;
-                if (pg < 1)
-                    pg = 1;
-                int recsCount = skills.Count();
-                var pager = new Pager(recsCount, pg, pageSize);
-                int recSkip = (pg - 1) * pageSize;
-                var data = skills.Skip(recSkip).Take(pager.PageSize).ToList();
-                this.ViewBag.Pager = pager;
-
-                return View(data);
+                
             }
             else
             {
-                var searchResult = result.Content.Where(skill => skill.Name.ToLower().Contains(searchPhrase.ToLower())); 
-                skills = searchResult.ToList();
-                return View(skills);
+               return RedirectToAction("SearchSkills", new {search = searchPhrase});
+                
             }
-            
 
-            
+            if (pg < 1)
+                pg = 1;
+            int recsCount = skills.Count();
+            var pager = new Pager(recsCount, pg, pageSize);
+            int recSkip = (pg - 1) * pageSize;
+            var data = skills.Skip(recSkip).Take(pager.PageSize).ToList();
+            this.ViewBag.Pager = pager;
+
+            return View(data);
+
+
+        }
+
+        public async Task<IActionResult> SearchSkills(string search, int pg = 1)
+        {
+            const int pageSize = 20;
+            if (string.IsNullOrEmpty(search))
+            {
+                return RedirectToAction("GetAllSkills");
+            }
+            var response = await _apiService.GetAllSkills();
+            var searchResult = response.Content.Where(skill => skill.Name.ToLower().Contains(search.ToLower()));
+            var skills = searchResult.ToList();
+            if (pg < 1)
+                pg = 1;
+            int recsCount = skills.Count();
+            var pager = new Pager(recsCount, pg, pageSize);
+            int recSkip = (pg - 1) * pageSize;
+            var data = skills.Skip(recSkip).Take(pager.PageSize).ToList();
+            this.ViewBag.Pager = pager;
+
+            return View(new SearchAllSkillsViewModel() { SearchPhrase = search, Skills = data });
 
         }
 
