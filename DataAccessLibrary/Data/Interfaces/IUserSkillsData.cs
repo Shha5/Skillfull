@@ -13,9 +13,5 @@ namespace DataAccessLibrary.Data.Interfaces
         List<TaskDataModel> GetTasksForUserSkillId(string userSkillId);
         Task ModifyTask(TaskDataModel task);
         Task UpdateUserSkillAssessment(int userSkillId, int skillAssessmentId);
-        
-        
-
-
     }
 }

@@ -45,7 +45,7 @@ namespace SkillfullAPI.Controllers
             {
                 return Ok();
             }
-            else if(result.Errors.Any())
+            else if (result.Errors.Any())
             {
                 List<string> errors = new List<string>();
                 foreach (var error in result.Errors)
@@ -64,7 +64,7 @@ namespace SkillfullAPI.Controllers
         [Route("ChangePassword")]
         public async Task<IActionResult> ChangePassword([FromForm] PasswordChangeRequestDto passwordChangeRequest)
         {
-            if(ModelState.IsValid) 
+            if (ModelState.IsValid) 
             {
                 var user = await _userManager.FindByIdAsync(passwordChangeRequest.UserId);
                 var result = await _userManager.ChangePasswordAsync(user, passwordChangeRequest.CurrentPassword, passwordChangeRequest.NewPassword);
@@ -77,10 +77,7 @@ namespace SkillfullAPI.Controllers
                     return BadRequest(new AuthResultModel()
                     {
                         Result = false,
-                        Errors = new List<string>()
-                        {
-                            result.Errors.ToString()
-                        }
+                        Errors = new List<string>() { result.Errors.ToString() }
                     });
                 }  
             }
@@ -118,10 +115,7 @@ namespace SkillfullAPI.Controllers
                 return BadRequest(new AuthResultModel()
                 {
                     Result = false,
-                    Errors = new List<string>()
-                    {
-                        "Invalid request"
-                    }
+                    Errors = new List<string>() { "Invalid request" }
                 });
             }
             var user = await _userManager.FindByEmailAsync(email);
@@ -154,10 +148,7 @@ namespace SkillfullAPI.Controllers
                     return BadRequest(new AuthResultModel()
                     {
                         Result = false,
-                        Errors = new List<string>()
-                        {
-                            "Invalid credentials"
-                        }
+                        Errors = new List<string>() { "Invalid credentials" }
                     });
                 }
                 var isCorrect = await _userManager.CheckPasswordAsync(user, loginRequest.Password);
@@ -166,14 +157,10 @@ namespace SkillfullAPI.Controllers
                     return BadRequest(new AuthResultModel()
                     {
                         Result = false,
-                        Errors = new List<string>()
-                        {
-                            "Invalid credentials"
-                        }
+                        Errors = new List<string>() { "Invalid credentials" }
                     });
                 }
                 var jwtToken = await _jwtTokenGenerationService.GenerateJwtToken(user);
-
                 return Ok(new AuthResultModel()
                 {
                     Token = jwtToken.Token,
@@ -186,10 +173,7 @@ namespace SkillfullAPI.Controllers
             return BadRequest(new AuthResultModel()
             {
                 Result = false,
-                Errors = new List<string>()
-                {
-                    "Invalid credentials"
-                }
+                Errors = new List<string>() { "Invalid credentials" }
             });
         }
 
@@ -350,7 +334,7 @@ namespace SkillfullAPI.Controllers
                 });
             }
             var user = await _userManager.FindByIdAsync(userId);
-            if(user == null)
+            if (user == null)
             {
                 return BadRequest(new AuthResultModel()
                 {

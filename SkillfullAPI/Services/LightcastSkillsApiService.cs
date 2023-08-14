@@ -39,19 +39,21 @@ namespace SkillfullAPI.Services
                 string responseAsString = await response.Content.ReadAsStringAsync();
                 if (string.IsNullOrEmpty(responseAsString))
                 {
+                    _logger.LogError($"Requested content was not returned");
                     return default(T);
                 }
                
                 T lightcastSkillsData = await DeserializeApiResponseAsync<T>(responseAsString);
-                if(lightcastSkillsData == null)
+                if (lightcastSkillsData == null)
                 {
+                    _logger.LogError("Deserialization was not successfull");
                     return default(T);
                 }
                 return lightcastSkillsData;
             }
             else
             {
-                _logger.LogInformation(nameof(LightcastSkillsApiService), $"Request to auth.emsicloud.com/connect/token returned {response.StatusCode}");
+                _logger.LogInformation($"Request to auth.emsicloud.com/connect/token returned {response.StatusCode}");
                 return default(T);
             }
         }
@@ -59,7 +61,6 @@ namespace SkillfullAPI.Services
         private string CreateRequestUri(string? skillId = null)
         {
             string requestUri;
-
             if (!string.IsNullOrEmpty(skillId))
             {
                 requestUri = string.Concat("https://emsiservices.com/skills/versions/latest/skills/", skillId);
@@ -68,7 +69,6 @@ namespace SkillfullAPI.Services
             {
                 requestUri = "https://emsiservices.com/skills/versions/latest/skills";
             }
-
             return requestUri;
         }
 
@@ -83,14 +83,14 @@ namespace SkillfullAPI.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogInformation(nameof(LightcastSkillsApiService), $"Deserialization failed. {ex.Message}");
+                    _logger.LogError($"Deserialization failed. {ex.Message}");
                     return default(T);
                 }
                 return result;
             }
             else
             {
-                _logger.LogInformation(nameof(LightcastSkillsApiService), $"Failed to receive information from Lightcast Api");
+                _logger.LogError($"Failed to receive information from Lightcast Api");
                 return default(T);
             }
         }
@@ -104,11 +104,11 @@ namespace SkillfullAPI.Services
                 if (_memoryCache.TryGetValue("LightcastToken", out LightcastAuthTokenModel value))
                 {
                     token = value;
-                    _logger.LogInformation(nameof(LightcastSkillsApiService), $"Token found in cache.");
+                    _logger.LogInformation($"Token found in cache.");
                 }
                 else
                 {
-                    _logger.LogInformation(nameof(LightcastSkillsApiService), $"Token was not found in cache. Requesting new token from emsi.");
+                    _logger.LogInformation($"Token was not found in cache. Requesting new token from emsi.");
                     token = await RequestLightcastToken();
                     var cacheEntryOptions = new MemoryCacheEntryOptions()
                         .SetSlidingExpiration(TimeSpan.FromSeconds(1800))
@@ -130,41 +130,34 @@ namespace SkillfullAPI.Services
             var accessInfo = _configuration.GetSection("LightcastApi");
             if (accessInfo == null)
             {
-                _logger.LogInformation(nameof(LightcastSkillsApiService), $"Couldn't retrieve access information from secrets.json");
+                _logger.LogError($"Couldn't retrieve access information from secrets.json");
                 return null;
             }
             string clientId = accessInfo.GetValue<string>("ClientId");
             string secret = accessInfo.GetValue<string>("Secret");
             string scope = accessInfo.GetValue<string>("Scope");
-
             var values = new Dictionary<string, string>
-                    {
-                        {"client_id", clientId },
-                        {"client_secret", secret},
-                        {"grant_type", "client_credentials"},
-                        {"scope", scope},
-                    };
-
+            {
+                {"client_id", clientId },
+                {"client_secret", secret},
+                {"grant_type", "client_credentials"},
+                {"scope", scope},
+            };
             var requestContent = new FormUrlEncodedContent(values);
             var response = await _authClient.PostAsync("https://auth.emsicloud.com/connect/token", requestContent);
-
             if (response.IsSuccessStatusCode)
             {
                 string responseAsString = await response.Content.ReadAsStringAsync();
                 if (string.IsNullOrEmpty(responseAsString))
                 {
+                    _logger.LogError("Requested content was not returned");
                     return null;
                 }
                 var token = await DeserializeApiResponseAsync<LightcastAuthTokenModel>(responseAsString);
                 return token;
             }
+            _logger.LogError($"Request was not successfull. Response: {response.StatusCode}");
             return null;
-        }
-
-
-
-
-                    
-                
+        }         
     }
 }

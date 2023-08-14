@@ -17,13 +17,16 @@ namespace SkillfullAPI.Services
         private readonly ApplicationDbContext _context;
         private readonly TokenValidationParameters _validationParameters;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly ILogger<JwtTokenGenerationService> _logger;
 
-        public JwtTokenGenerationService(IConfiguration configuration, ApplicationDbContext context, TokenValidationParameters validationParameters, UserManager<IdentityUser> userManager)
+        public JwtTokenGenerationService(IConfiguration configuration, ApplicationDbContext context, TokenValidationParameters validationParameters, 
+            UserManager<IdentityUser> userManager, ILogger<JwtTokenGenerationService> logger)
         {
             _configuration = configuration;
             _context = context;
             _validationParameters = validationParameters;
             _userManager = userManager;
+            _logger = logger;
         }
 
         public async Task<AuthResultModel> GenerateJwtToken(IdentityUser user)
@@ -40,11 +43,9 @@ namespace SkillfullAPI.Services
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToUniversalTime().ToString())
                 }),
-
                 Expires = DateTime.UtcNow.Add(expiryTimeFrame),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
             };
-
             var token = jwtTokenHandler.CreateToken(tokenDescriptor);
             var jwtToken = jwtTokenHandler.WriteToken(token);
             var refreshToken = new RefreshTokenModel()
@@ -57,17 +58,14 @@ namespace SkillfullAPI.Services
                 IsUsed = false,
                 UserId = user.Id,
             };
-
             await _context.RefreshTokens.AddAsync(refreshToken);
             await _context.SaveChangesAsync();
-
             return new AuthResultModel()
             {
                 Result = true,
                 Token = jwtToken,
                 RefreshToken = refreshToken.Token
             };
-
         }
 
         public async Task<bool> IsTokenValid(string token)
@@ -79,8 +77,9 @@ namespace SkillfullAPI.Services
                 var unixExpiryDate = long.Parse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
                 var expiryDateTime = UnixTimeStampToDateTime(unixExpiryDate);
 
-                if(expiryDateTime < DateTime.UtcNow.AddMinutes(1))
+                if (expiryDateTime < DateTime.UtcNow.AddMinutes(1))
                 {
+                    _logger.LogInformation("Token expired");
                     return false;
                 }
                 else
@@ -89,15 +88,14 @@ namespace SkillfullAPI.Services
                 }
             } catch (Exception ex)
             {
+                _logger.LogError($"Could not check if token is valid. Exception: {ex.Message}");
                 return false;
             }
-            
         }
 
         public async Task<AuthResultModel> VerifyAndGenerateToken(TokenRequestDto tokenRequest)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
-
             try
             {
                 _validationParameters.ValidateLifetime = false; //for testing
@@ -107,17 +105,15 @@ namespace SkillfullAPI.Services
                 var expiryDateTime = UnixTimeStampToDateTime(unixExpiryDate);
                 var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == tokenRequest.RefreshToken);
                 var jti = tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
-
                 if (validatedToken is JwtSecurityToken jwtSecurityToken)
                 {
                     var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
-                    if(result == false)
+                    if (result == false)
                     {
                         return null;
                     }
                 }
-
-                if(storedToken.ExpiryDate < DateTime.UtcNow)
+                if (storedToken.ExpiryDate < DateTime.UtcNow)
                 {
                     return new AuthResultModel()
                     {
@@ -128,7 +124,6 @@ namespace SkillfullAPI.Services
                         }
                     };
                 }
-
                 if (storedToken == null || storedToken.IsUsed || storedToken.IsRevoked || storedToken.JwtId != jti)
                 {
                     return new AuthResultModel()
@@ -140,18 +135,15 @@ namespace SkillfullAPI.Services
                         }
                     };
                 }
-
                 storedToken.IsUsed = true;
-
                  _context.RefreshTokens.Update(storedToken);
                 await _context.SaveChangesAsync();
-
                 var dbUser = await _userManager.FindByIdAsync(storedToken.UserId);
-
                 return await GenerateJwtToken(dbUser);
             }
             catch (Exception ex)
             {
+                _logger.LogError($"{ex.Message}");
                 return new AuthResultModel()
                 {
                     Result = false,

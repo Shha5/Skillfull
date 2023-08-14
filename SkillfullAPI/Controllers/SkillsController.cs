@@ -20,7 +20,7 @@ namespace SkillfullAPI.Controllers
         public async Task<SkillDataModel> GetAllSkills()
         {
             SkillDataModel result = await _skillsApiService.GetLightcastSkillsData<SkillDataModel>();
-            if(result == null)
+            if (result == null)
             {
                 return null;
             }
@@ -32,7 +32,7 @@ namespace SkillfullAPI.Controllers
         public async Task<SkillDetailsDataModel> GetSkillDetailsById(string skillId)
         {
             SkillDetailsDataModel result = await _skillsApiService.GetLightcastSkillsData<SkillDetailsDataModel>(skillId);
-            if(result == null)
+            if (result == null)
             {
                 return null;
             }

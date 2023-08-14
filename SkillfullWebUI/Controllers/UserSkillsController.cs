@@ -95,7 +95,7 @@ namespace SkillfullWebUI.Controllers
             }
 
             var response = await _apiService.UpdateUserSkill(updateUserSkill.UserSkillId, updateUserSkill.NewSkillAssessmentId);
-            if(response.Result == false)
+            if (response.Result == false)
             {
                 return View("Error");
             }
@@ -108,14 +108,14 @@ namespace SkillfullWebUI.Controllers
             {
                 return View("Error");
             }
-            if(_cookieManager.AreAuthCookiesPresent() == false)
+            if (_cookieManager.AreAuthCookiesPresent() == false)
             {
                 ViewBag.ErrorMessage = "You must be logged in to perform this action.";
                 return View();
             }
           
             var result = await _apiService.DeleteUserSkill(userSkillId);
-            if(result.Result == false)
+            if (result.Result == false)
             {
                 return View("Error");
             }
@@ -140,12 +140,12 @@ namespace SkillfullWebUI.Controllers
                 ViewBag.ErrorMessage = "Not all necessary information have been provided";
                 return View();
             }
-            if(_cookieManager.AreAuthCookiesPresent() == false)
+            if (_cookieManager.AreAuthCookiesPresent() == false)
             {
                 return RedirectToAction("Login", "Auth");
             }
             var result = await _apiService.AddTask(addUserSkillTask);
-            if(result.Result == false)
+            if (result.Result == false)
             {
                 return View("Error");
             }
@@ -174,11 +174,11 @@ namespace SkillfullWebUI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllTasksByUserSkillId(string? userSkillId = null, string? userSkillName = null)
         {
-            if(string.IsNullOrEmpty(userSkillId) || string.IsNullOrEmpty(userSkillName))
+            if (string.IsNullOrEmpty(userSkillId) || string.IsNullOrEmpty(userSkillName))
             {
                 return View("Error");
             }
-            if(_cookieManager.AreAuthCookiesPresent() == false)
+            if (_cookieManager.AreAuthCookiesPresent() == false)
             {
                 return RedirectToAction("Login", "Auth");
             }
@@ -198,7 +198,7 @@ namespace SkillfullWebUI.Controllers
 
         public IActionResult UpdateUserSkillTask(string? userSkillTaskId = null, string? taskName = null)
         {
-            if(string.IsNullOrEmpty(userSkillTaskId) || string.IsNullOrEmpty(taskName))
+            if (string.IsNullOrEmpty(userSkillTaskId) || string.IsNullOrEmpty(taskName))
             {
                 return View("Error");
             }
@@ -229,7 +229,7 @@ namespace SkillfullWebUI.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteUserSkillTask(string? userSkillTaskId = null)
         {
-            if(string.IsNullOrEmpty (userSkillTaskId))
+            if (string.IsNullOrEmpty (userSkillTaskId))
             {
                 return View("Error");
             }

@@ -19,6 +19,7 @@ namespace SkillfullAPI.Services
             string apiKey = _configuration.GetSection("SendGrid:Key").Value;
             if (string.IsNullOrEmpty(apiKey))
             {
+                _logger.LogError("Could not retrieve SendGrid Api key");
                 throw new Exception("Null SendGridKey");
             }
             await Execute(apiKey, subject, message, toEmail);

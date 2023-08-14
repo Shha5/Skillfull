@@ -9,7 +9,6 @@ namespace SkillfullWebUI.Controllers
         private readonly IApiService _apiService;
         private readonly ICookieManagerService _cookieManager;
        
-
         public AuthController(IApiService apiService, ICookieManagerService cookieManager)
         {
             _apiService = apiService;
@@ -53,8 +52,7 @@ namespace SkillfullWebUI.Controllers
             else
             {
                 return RedirectToAction("Login");
-            }
-               
+            }   
         }
 
         [HttpPost]
@@ -84,7 +82,6 @@ namespace SkillfullWebUI.Controllers
             }
             ViewBag.ErrorMessage = "Please provide all the necessary data";
             return View();
-           
         }
 
         [HttpGet]
@@ -101,7 +98,7 @@ namespace SkillfullWebUI.Controllers
         [HttpPost]
         public async Task<IActionResult> ConfirmEmail(EmailConfirmationModel emailConfirmation)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 var result = await _apiService.ConfirmEmail(emailConfirmation);
                 if (result.Result == true)
@@ -210,7 +207,7 @@ namespace SkillfullWebUI.Controllers
         [HttpGet]
         public IActionResult ResetPassword(string? userId = null, string? passwordResetToken = null )
         {
-            if(userId == null || passwordResetToken == null)
+            if (userId == null || passwordResetToken == null)
             {
                 return View("Error");
             }

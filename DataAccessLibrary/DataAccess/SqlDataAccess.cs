@@ -33,7 +33,5 @@ namespace DataAccessLibrary.DataAccess
                 commandType: CommandType.StoredProcedure);
             }
         }
-
-
     }
 }

@@ -2,13 +2,8 @@ using DataAccessLibrary.Data;
 using DataAccessLibrary.Data.Interfaces;
 using DataAccessLibrary.DataAccess;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SkillfullAPI.Data;
 using SkillfullAPI.Services;
@@ -23,6 +18,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JwtConfig:Secret").Value);
 var tokenValidationParameters = new TokenValidationParameters()
 {
@@ -30,7 +29,7 @@ var tokenValidationParameters = new TokenValidationParameters()
     IssuerSigningKey = new SymmetricSecurityKey(key),
     ValidateIssuer = false, //for dev
     ValidateAudience = false, //for dev
-    RequireExpirationTime = false, //to be updated after adding refresh token
+    RequireExpirationTime = true, 
     ValidateLifetime = true
 };
 
@@ -44,22 +43,9 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(jwt =>
     {
-
         jwt.SaveToken = true;
         jwt.TokenValidationParameters = tokenValidationParameters;
-        //jwt.Events.OnMessageReceived = context =>
-        //{
-
-        //    if (context.Request.Cookies.ContainsKey("token"))
-        //    {
-        //        context.Token = context.Request.Cookies["token"];
-        //    }
-        //    return Task.CompletedTask;
-        //};
     });
-
-
-
 
 builder.Services.AddHttpClient<ILightcastSkillsApiService, LightcastSkillsApiService>(client =>
 client.BaseAddress = new Uri("https://auth.emsicloud.com/connect/token"));

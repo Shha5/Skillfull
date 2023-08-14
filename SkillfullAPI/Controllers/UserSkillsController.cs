@@ -60,7 +60,7 @@ namespace SkillfullAPI.Controllers
             {
                 return null;
             }
-            foreach(var item in result)
+            foreach (var item in result)
             {
                 userSkills.Add(new UserSkillModel()
                 {
@@ -89,7 +89,7 @@ namespace SkillfullAPI.Controllers
         [Route("DeleteUserSkill")]
         public async Task<IActionResult> DeleteUserSkill([FromForm]int userSkillId)
         {
-            if(userSkillId == null)
+            if (userSkillId == null)
             {
                 return BadRequest("Invalid request");
             }
@@ -194,7 +194,7 @@ namespace SkillfullAPI.Controllers
         [Route("ModifyTask")]
         public async Task<IActionResult> ModifyTask([FromForm]ModifyTaskModel userSkillTask)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 await _userSkillsData.ModifyTask(new TaskDataModel
                 {
@@ -213,7 +213,7 @@ namespace SkillfullAPI.Controllers
         [Route("DeleteTask")]
         public async Task<IActionResult> DeleteTask(int userSkillTaskId)
         {
-            if(userSkillTaskId == null)
+            if (userSkillTaskId == null)
             {
                 return BadRequest();
             }

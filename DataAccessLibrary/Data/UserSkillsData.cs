@@ -16,6 +16,7 @@ namespace DataAccessLibrary.Data
 
         public Task AddUserSkill(string userId, UserSkillDataModel userSkill) =>
              _sqlDataAccess.SaveData("dbo.sp_Add_UserSkills", new { userId, userSkill.SkillName, userSkill.SkillId, userSkill.SkillAssessmentId });
+
         public Task AddTask(string userId, TaskDataModel task) =>
              _sqlDataAccess.SaveData("dbo.sp_Add_Tasks", new { task.UserSkillId, task.UserSkillName, task.Name, task.Description, task.StatusId, userId });
 
@@ -41,16 +42,10 @@ namespace DataAccessLibrary.Data
         }
 
         public Task ModifyTask(TaskDataModel task) =>
-    _sqlDataAccess.SaveData("dbo.sp_Modify_Tasks", new { task.Id, task.Name, task.Description, task.StatusId });
-
+            _sqlDataAccess.SaveData("dbo.sp_Modify_Tasks", new { task.Id, task.Name, task.Description, task.StatusId });
 
         public Task UpdateUserSkillAssessment(int userSkillId, int skillAssessmentId) =>
             _sqlDataAccess.SaveData("dbo.sp_Update_UserSkills", new { userSkillId, skillAssessmentId });
-
-
-
-        
-
     }
 }
 

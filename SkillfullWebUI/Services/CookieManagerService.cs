@@ -33,7 +33,6 @@ namespace SkillfullWebUI.Services
                     Expires = DateTime.UtcNow.AddDays(30),
                     IsEssential = true,
                 });
-
                 _contextAccessor.HttpContext.Response.Cookies.Append(CookieNames.RefreshToken, authResult.RefreshToken, new CookieOptions
                 {
                     Domain = "localhost",
@@ -42,7 +41,6 @@ namespace SkillfullWebUI.Services
                     IsEssential = true,
                     Secure = true
                 });
-
                 _contextAccessor.HttpContext.Response.Cookies.Append(CookieNames.UserId, authResult.UserId, new CookieOptions
                 {
                     Domain = "localhost",
@@ -51,7 +49,6 @@ namespace SkillfullWebUI.Services
                     IsEssential = true,
                     Secure = true
                 });
-
                 if (authResult.Username != null && _contextAccessor.HttpContext.Request.Cookies.ContainsKey(CookieNames.CookieConsent))
                 {
                     _contextAccessor.HttpContext.Response.Cookies.Append(CookieNames.Username, authResult.Username, new CookieOptions
@@ -73,7 +70,6 @@ namespace SkillfullWebUI.Services
                     IsEssential = true,
                     Secure = true
                 });
-
                 _contextAccessor.HttpContext.Response.Cookies.Append(CookieNames.RefreshToken, authResult.RefreshToken, new CookieOptions
                 {
                     Domain = "localhost",
@@ -90,7 +86,6 @@ namespace SkillfullWebUI.Services
                     IsEssential = true,
                     Secure = true
                 });
-
                 if (authResult.Username != null && _contextAccessor.HttpContext.Request.Cookies.ContainsKey(CookieNames.CookieConsent))
                 {
                     _contextAccessor.HttpContext.Response.Cookies.Append(CookieNames.Username, authResult.Username, new CookieOptions
@@ -133,8 +128,7 @@ namespace SkillfullWebUI.Services
             var tokenCookiePresent = _contextAccessor.HttpContext.Request.Cookies.ContainsKey(CookieNames.Token);
             var refreshTokenCookiePresent = _contextAccessor.HttpContext.Request.Cookies.ContainsKey(CookieNames.RefreshToken);
             var userIdCookiePresent = _contextAccessor.HttpContext.Request.Cookies.ContainsKey(CookieNames.UserId);
-
-            if(tokenCookiePresent == true && refreshTokenCookiePresent == true && userIdCookiePresent == true)
+            if (tokenCookiePresent == true && refreshTokenCookiePresent == true && userIdCookiePresent == true)
             {
                 return true;
             }

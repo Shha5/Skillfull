@@ -33,7 +33,6 @@ namespace SkillfullWebUI.Controllers
             return View();
         }
 
-
         [HttpGet]
         public async Task<IActionResult> GetAllSkills(string? searchPhrase, int pg = 1)
         {
@@ -41,7 +40,8 @@ namespace SkillfullWebUI.Controllers
             List<SkillModel> skills = new();
 
             var result = await _apiService.GetAllSkills();
-            if(string.IsNullOrEmpty(searchPhrase))
+
+            if (string.IsNullOrEmpty(searchPhrase))
             {
                 skills = result.Content; 
             }
@@ -62,8 +62,6 @@ namespace SkillfullWebUI.Controllers
 
             return View(new GetAllSkillsViewModel() { SearchPhrase = searchPhrase, Skills = data });
         }
-
-       
 
         [HttpGet]
         public async Task<IActionResult> GetSkillDetails(string? skillId)

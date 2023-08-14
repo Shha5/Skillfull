@@ -17,15 +17,14 @@ namespace SkillfullWebUI.Services
         private readonly HttpClient _apiClient;
         private readonly ICookieManagerService _cookieManager;
 
-
         public ApiService(ILogger<ApiService> logger, HttpClient apiClient, ICookieManagerService cookieManager)
         {
             _logger = logger;
             _apiClient = apiClient;
             _cookieManager = cookieManager;
         }
-        // ALL SKILLS
 
+        //HOME CONTROLLER METHODS
         public async Task<ApiServiceGetResponseModel<List<SkillModel>>> GetAllSkills()
         {
             string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.GetAllSkills);
@@ -46,7 +45,6 @@ namespace SkillfullWebUI.Services
                     Result = false,
                     ErrorMessage = "Couldn't retrieve skills list"
                 };
- 
             }
             SkillDataModel skillData = await DeserializeApiResponseAsync<SkillDataModel>(responseString);
             List<SkillModel> skills = new List<SkillModel>();
@@ -106,8 +104,7 @@ namespace SkillfullWebUI.Services
             };
         }  
 
-        //AUTH
-        
+        //AUTH CONTROLLER METHODS
         public async Task<ApiServicePostResponseModel> ConfirmEmail(EmailConfirmationModel emailConfirmation)
         {
             var token = HttpUtility.UrlEncode(emailConfirmation.EmailConfirmationToken);
@@ -136,7 +133,6 @@ namespace SkillfullWebUI.Services
                 { "Email", login.Email },
                 { "Password", login.Password }
             };
-
             var requestContent = new FormUrlEncodedContent(values);
             var apiResponse = await _apiClient.PostAsync(url, requestContent);
             if (apiResponse.IsSuccessStatusCode == false)
@@ -151,7 +147,7 @@ namespace SkillfullWebUI.Services
             {
                 string apiResponseAsString = await apiResponse.Content.ReadAsStringAsync();
                 var authResult = await DeserializeApiResponseAsync<AuthResultModel>(apiResponseAsString);
-                if(authResult == null || authResult.Result == false)
+                if (authResult == null || authResult.Result == false)
                 {
                     return new ApiServicePostResponseModel()
                     {
@@ -176,9 +172,8 @@ namespace SkillfullWebUI.Services
                 {"ConfirmPassword", registrationRequest.ConfirmPassword}
             };
             var requestContent = new FormUrlEncodedContent(values);
-
             var response = await _apiClient.PostAsync(url, requestContent);
-            if(response.IsSuccessStatusCode == false)
+            if (response.IsSuccessStatusCode == false)
             {
                 return new ApiServicePostResponseModel()
                 {
@@ -201,7 +196,6 @@ namespace SkillfullWebUI.Services
                 {"Email", resendEmailConfirmation.Email },
                 { "Password", resendEmailConfirmation.Password}
             };
-
             var requestContent = new FormUrlEncodedContent(values);
             var response = await _apiClient.PostAsync(url, requestContent);
             if (response.IsSuccessStatusCode == false)
@@ -225,7 +219,7 @@ namespace SkillfullWebUI.Services
             var requestContent = new FormUrlEncodedContent(values);
             string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.ForgotPassword);
             var response = await _apiClient.PostAsync(url, requestContent);
-            if(response.IsSuccessStatusCode == false)
+            if (response.IsSuccessStatusCode == false)
             {
                 return new ApiServicePostResponseModel()
                 {
@@ -244,13 +238,14 @@ namespace SkillfullWebUI.Services
         {
             string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.ResetPassword);
             var values = new Dictionary<string, string>()
-            { { "passwordResetToken", resetPassword.PasswordResetToken },
+            { 
+              { "passwordResetToken", resetPassword.PasswordResetToken },
               { "userId", resetPassword.UserId },
               { "newPassword", HttpUtility.UrlEncode(resetPassword.Password) }
             };
             var requestContent = new FormUrlEncodedContent(values);
             var response = await _apiClient.PostAsync(url, requestContent);
-            if(response.IsSuccessStatusCode == false)
+            if (response.IsSuccessStatusCode == false)
             {
                 return new ApiServicePostResponseModel()
                 {
@@ -270,12 +265,14 @@ namespace SkillfullWebUI.Services
             string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.ChangePassword);
             var authCookies = _cookieManager.GetAuthCookieValues();
             var values = new Dictionary<string, string>()
-            { { "UserId", authCookies.UserId },
-              { "CurrentPassword", changePassword.Password },
-              {"NewPassword", changePassword.NewPassword } };
+            { 
+                { "UserId", authCookies.UserId },
+                { "CurrentPassword", changePassword.Password },
+                {"NewPassword", changePassword.NewPassword } 
+            };
             var requestContent = new FormUrlEncodedContent(values);
             var response = await _apiClient.PostAsync(url,requestContent);
-            if(response.IsSuccessStatusCode == false)
+            if (response.IsSuccessStatusCode == false)
             {
                 return new ApiServicePostResponseModel()
                 {
@@ -290,7 +287,7 @@ namespace SkillfullWebUI.Services
             };
         }
 
-        //USERSKILLS
+        //USERSKILLS CONTROLLER METHODS
         public async Task<ApiServicePostResponseModel> AddUserSkill(AddUserSkillViewModel addUserSkill)
         {
             var cookieVerification = await VerifyAndRefreshCookies();
@@ -304,12 +301,10 @@ namespace SkillfullWebUI.Services
             {
                 {"UserId", authCookies.UserId },
                 {"SkillId", addUserSkill.SkillId },
-                {"SkillName", addUserSkill.SkillName},
-                {"SkillAssessmentId", addUserSkill.SkillAssessmentId}
+                {"SkillName", addUserSkill.SkillName },
+                {"SkillAssessmentId", addUserSkill.SkillAssessmentId }
             };
-
             var requestContent = new FormUrlEncodedContent(values);
-
             _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
             var result = await _apiClient.PostAsync(url, requestContent);
             if (result.IsSuccessStatusCode)
@@ -328,7 +323,6 @@ namespace SkillfullWebUI.Services
                     ErrorMessage = result.StatusCode.ToString()
                 };
             }
-
         }
 
         public async Task<ApiServiceGetResponseModel<List<UserSkillModel>>> GetAllUserSkills()
@@ -345,21 +339,17 @@ namespace SkillfullWebUI.Services
             }
             var authCookies =  _cookieManager.GetAuthCookieValues();
             string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.GetAllUserSkills, "?userId=", authCookies.UserId);
-        
             _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
-           
             var response = await _apiClient.GetAsync(url);
-           
-            if(response.IsSuccessStatusCode && response.Content == null)
+            if (response.IsSuccessStatusCode && response.Content == null)
             {
-              return new ApiServiceGetResponseModel<List<UserSkillModel>>()
-               {
+                return new ApiServiceGetResponseModel<List<UserSkillModel>>()
+                {
                     Result = true,
                     ErrorMessage = "No userskills were added",
                     Content = null
-               };
+                };
             }
-
             string responseContent = await response.Content.ReadAsStringAsync();
             var result = await DeserializeApiResponseAsync<List<UserSkillModel>>(responseContent);
             return new ApiServiceGetResponseModel<List<UserSkillModel>>()
@@ -382,12 +372,11 @@ namespace SkillfullWebUI.Services
             var values = new Dictionary<string, string>()
             {
                 {"userSkillId", userSkillId },
-                {"newSkillAssessmentId", newSkillAssessmentId}
+                {"newSkillAssessmentId", newSkillAssessmentId }
             };
 
             var requestContent = new FormUrlEncodedContent(values);
             _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
-
             var result = await _apiClient.PostAsync(url, requestContent);
             if (result.IsSuccessStatusCode == false)
             {
@@ -415,13 +404,13 @@ namespace SkillfullWebUI.Services
             string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.DeleteUserSkill);
             var values = new Dictionary<string, string>()
             {
-                {"userSkillId", userSkillId }
+                { "userSkillId", userSkillId }
             };
 
             var requestContent = new FormUrlEncodedContent(values);
             _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
             var response = await _apiClient.PostAsync(url, requestContent);
-            if(response.IsSuccessStatusCode == false)
+            if (response.IsSuccessStatusCode == false)
             {
                 return new ApiServicePostResponseModel()
                 {
@@ -447,19 +436,17 @@ namespace SkillfullWebUI.Services
             string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.AddTask);
             var values = new Dictionary<string, string>()
             {
-                
-                {"userId", authCookies.UserId},
-                {"TaskName", addUserSkillTask.TaskName },
+                { "userId", authCookies.UserId },
+                { "TaskName", addUserSkillTask.TaskName },
                 { "TaskDescription", addUserSkillTask.TaskDescription },
-                { "TaskStatusId", addUserSkillTask.TaskStatusId},
-                {"UserSkillId", addUserSkillTask.UserSkillId },
-                {"UserSkillName", addUserSkillTask.UserSkillName }
+                { "TaskStatusId", addUserSkillTask.TaskStatusId },
+                { "UserSkillId", addUserSkillTask.UserSkillId },
+                { "UserSkillName", addUserSkillTask.UserSkillName }
             };
-
             var requestContent = new FormUrlEncodedContent(values);
             _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
             var response = await _apiClient.PostAsync(url,requestContent);
-            if(response.IsSuccessStatusCode == false)
+            if (response.IsSuccessStatusCode == false)
             {
                 return new ApiServicePostResponseModel() 
                 {
@@ -473,7 +460,6 @@ namespace SkillfullWebUI.Services
                 ErrorMessage = null
             };
         }
-
 
         public async Task<ApiServiceGetResponseModel<List<TaskModel>>> GetAllTasksByUserId()
         {
@@ -490,8 +476,8 @@ namespace SkillfullWebUI.Services
             var authCookies = _cookieManager.GetAuthCookieValues();
             string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.GetAllTasksByUserId, "?userId=", authCookies.UserId);
             _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
-           var response = await _apiClient.GetAsync(url);
-            if(response.IsSuccessStatusCode == false)
+            var response = await _apiClient.GetAsync(url);
+            if (response.IsSuccessStatusCode == false)
             {
                 return new ApiServiceGetResponseModel<List<TaskModel>>() 
                 {
@@ -532,10 +518,9 @@ namespace SkillfullWebUI.Services
             }
             var authCookies = _cookieManager.GetAuthCookieValues();
             string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.GetAllTasksByUserSkillId, "?userSkillId=", userSkillId);
-
             _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
             var response = await _apiClient.GetAsync(url); 
-            if(response.IsSuccessStatusCode == false)
+            if (response.IsSuccessStatusCode == false)
             {
                 return new ApiServiceGetResponseModel<List<TaskModel>>()
                 {
@@ -544,7 +529,7 @@ namespace SkillfullWebUI.Services
                     Content = null
                 };
             }
-            if(response.IsSuccessStatusCode && response.Content == null)
+            if (response.IsSuccessStatusCode && response.Content == null)
             {
                 return new ApiServiceGetResponseModel<List<TaskModel>>()
                 {
@@ -582,7 +567,7 @@ namespace SkillfullWebUI.Services
             var requestContent = new FormUrlEncodedContent(values);
             _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);            
             var response = await _apiClient.PostAsync(url, requestContent);
-            if(response.IsSuccessStatusCode == false)
+            if (response.IsSuccessStatusCode == false)
             {
                 return new ApiServicePostResponseModel()
                 {
@@ -595,7 +580,6 @@ namespace SkillfullWebUI.Services
                 Result = true,
                 ErrorMessage = null
             };
-
         }
 
         public async Task<ApiServicePostResponseModel> DeleteTask( string userSkillTaskId)
@@ -614,7 +598,7 @@ namespace SkillfullWebUI.Services
             var requestContent = new FormUrlEncodedContent(values);
             _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
             var response = await _apiClient.PostAsync(url, requestContent);
-            if(response.IsSuccessStatusCode == false)
+            if (response.IsSuccessStatusCode == false)
             {
                 return new ApiServicePostResponseModel()
                 {
@@ -693,7 +677,6 @@ namespace SkillfullWebUI.Services
             }
             var authCookies = _cookieManager.GetAuthCookieValues();
             var rememberMe = _cookieManager.IsRememberMeCookiePresent();
-
             var tokenValidation = await CheckIfTokenIsValid(authCookies.Token);
             var tokenValidationString = await tokenValidation.Content.ReadAsStringAsync();
             if (tokenValidationString == null)
@@ -725,13 +708,14 @@ namespace SkillfullWebUI.Services
                     ErrorMessage = string.Empty
                 };
             }
-
             return new ApiServicePostResponseModel()
             {
                 Result = true,
                 ErrorMessage = string.Empty
             };
         }
+
+        //TODO: Think of some generic method to reuse
 
         //private async Task<string> GetAllSkillsApiResponse()
         //{
