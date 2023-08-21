@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[sp_Delete_UserSkills]
-	@UserSkillId int
+	@UserSkillId INT
 	
 AS
 BEGIN

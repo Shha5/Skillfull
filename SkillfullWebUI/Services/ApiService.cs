@@ -299,11 +299,19 @@ namespace SkillfullWebUI.Services
             string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.AddUserSkill);
             var values = new Dictionary<string, string>()
             {
-                {"UserId", authCookies.UserId },
-                {"SkillId", addUserSkill.SkillId },
-                {"SkillName", addUserSkill.SkillName },
-                {"SkillAssessmentId", addUserSkill.SkillAssessmentId }
+                { "UserId", authCookies.UserId },
+                { "SkillId", addUserSkill.SkillId },
+                { "SkillName", addUserSkill.SkillName }
             };
+            if (addUserSkill.SkillAssessmentId != null && addUserSkill.SkillAssessmentId != 0)
+            {
+                values.Add("SkillAssessmentId", Convert.ToString(addUserSkill.SkillAssessmentId));
+            }
+            if (addUserSkill.TargetSkillAssessmentId != null && addUserSkill.TargetSkillAssessmentId != 0)
+            {
+                values.Add("TargetSkillAssessnentId", Convert.ToString(addUserSkill.TargetSkillAssessmentId));
+            }
+
             var requestContent = new FormUrlEncodedContent(values);
             _apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authCookies.Token);
             var result = await _apiClient.PostAsync(url, requestContent);
@@ -360,7 +368,7 @@ namespace SkillfullWebUI.Services
             };
         }
 
-        public async Task<ApiServicePostResponseModel> UpdateUserSkill(string userSkillId, string newSkillAssessmentId)
+        public async Task<ApiServicePostResponseModel> UpdateUserSkill(string userSkillId, string newSkillAssessmentId, string newTargetSkillAssessmentId)
         {
             var cookieVerification = await VerifyAndRefreshCookies();
             if (cookieVerification.Result == false)
@@ -371,8 +379,9 @@ namespace SkillfullWebUI.Services
             string url = string.Concat(SkillfullApiEndpoints.BaseUrl, SkillfullApiEndpoints.UpdateUserSkill);
             var values = new Dictionary<string, string>()
             {
-                {"userSkillId", userSkillId },
-                {"newSkillAssessmentId", newSkillAssessmentId }
+                { "userSkillId", userSkillId },
+                { "newSkillAssessmentId", newSkillAssessmentId },
+                { "newTargetSkillAssessmentId", newTargetSkillAssessmentId }
             };
 
             var requestContent = new FormUrlEncodedContent(values);

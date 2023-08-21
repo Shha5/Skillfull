@@ -14,8 +14,21 @@ namespace DataAccessLibrary.Data
             _sqlDataAccess = sqlDataAccess;
         }
 
-        public Task AddUserSkill(string userId, UserSkillDataModel userSkill) =>
-             _sqlDataAccess.SaveData("dbo.sp_Add_UserSkills", new { userId, userSkill.SkillName, userSkill.SkillId, userSkill.SkillAssessmentId });
+        public Task AddUserSkill(string userId, UserSkillDataModel userSkill)
+        {
+            
+            if (userSkill.SkillAssessmentId == null || userSkill.SkillAssessmentId == 0)
+            {
+                userSkill.SkillAssessmentId = 1;
+            }
+            if (userSkill.TargetSkillAssessmentId == null || userSkill.TargetSkillAssessmentId == 0)
+            {
+                userSkill.TargetSkillAssessmentId = 3;
+            }
+
+            _sqlDataAccess.SaveData("dbo.sp_Add_UserSkills", new { userId, userSkill.SkillName, userSkill.SkillId, userSkill.SkillAssessmentId, userSkill.TargetSkillAssessmentId });
+            return Task.CompletedTask;
+        }
 
         public Task AddTask(string userId, TaskDataModel task) =>
              _sqlDataAccess.SaveData("dbo.sp_Add_Tasks", new { task.UserSkillId, task.UserSkillName, task.Name, task.Description, task.StatusId, userId });
@@ -44,8 +57,8 @@ namespace DataAccessLibrary.Data
         public Task ModifyTask(TaskDataModel task) =>
             _sqlDataAccess.SaveData("dbo.sp_Modify_Tasks", new { task.Id, task.Name, task.Description, task.StatusId });
 
-        public Task UpdateUserSkillAssessment(int userSkillId, int skillAssessmentId) =>
-            _sqlDataAccess.SaveData("dbo.sp_Update_UserSkills", new { userSkillId, skillAssessmentId });
+        public Task UpdateUserSkillAssessment(int userSkillId, int skillAssessmentId, int? targetSkillAssessmentId) =>
+            _sqlDataAccess.SaveData("dbo.sp_Update_UserSkills", new { userSkillId, skillAssessmentId, targetSkillAssessmentId });
     }
 }
 

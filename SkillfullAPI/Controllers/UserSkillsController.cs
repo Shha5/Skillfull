@@ -34,7 +34,8 @@ namespace SkillfullAPI.Controllers
                     SkillId = userSkillModel.SkillId,
                     SkillName = HttpUtility.UrlDecode(userSkillModel.SkillName),
                     Id = null,
-                    SkillAssessmentId = userSkillModel.SkillAssessmentId
+                    SkillAssessmentId = userSkillModel.SkillAssessmentId,
+                    TargetSkillAssessmentId = userSkillModel.TargetSkillAssessmentId,
                 };
 
                await _userSkillsData.AddUserSkill(userId, userSkill);
@@ -67,7 +68,8 @@ namespace SkillfullAPI.Controllers
                     UserSkillId = item.Id,
                     SkillId = item.SkillId,
                     SkillName = item.SkillName,
-                    SkillAssessmentId = item.SkillAssessmentId
+                    SkillAssessmentId = item.SkillAssessmentId,
+                    TargetSkillAssessmentId = item.TargetSkillAssessmentId
                 });
             }
             return userSkills;
@@ -75,13 +77,13 @@ namespace SkillfullAPI.Controllers
 
         [HttpPost]
         [Route("UpdateUserSkill")]
-        public async Task<IActionResult> UpdateUserSkill([FromForm] int userSkillId,[FromForm] int newSkillAssessmentId)
+        public async Task<IActionResult> UpdateUserSkill([FromForm] int userSkillId,[FromForm] int newSkillAssessmentId, [FromForm] int? newTargetSkillAssessmentId = null)
         {
             if (newSkillAssessmentId == null || newSkillAssessmentId <= 0 || newSkillAssessmentId > 5 || userSkillId == null)
             {
                 return BadRequest("Request not valid");
             }
-            await _userSkillsData.UpdateUserSkillAssessment(userSkillId, newSkillAssessmentId);
+            await _userSkillsData.UpdateUserSkillAssessment(userSkillId, newSkillAssessmentId, newTargetSkillAssessmentId);
             return Ok("Successfully updated.");
         }
 

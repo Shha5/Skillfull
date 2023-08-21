@@ -94,7 +94,7 @@ namespace SkillfullWebUI.Controllers
                 return View();
             }
 
-            var response = await _apiService.UpdateUserSkill(updateUserSkill.UserSkillId, updateUserSkill.NewSkillAssessmentId);
+            var response = await _apiService.UpdateUserSkill(updateUserSkill.UserSkillId, updateUserSkill.NewSkillAssessmentId, updateUserSkill.NewTargetSkillAssessmentId);
             if (response.Result == false)
             {
                 return View("Error");

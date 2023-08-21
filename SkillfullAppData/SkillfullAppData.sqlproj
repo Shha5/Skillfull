@@ -74,6 +74,7 @@
     <Build Include="StoredProcedures\sp_Delete_UserSkills.sql" />
     <Build Include="StoredProcedures\sp_Delete_Tasks.sql" />
     <Build Include="StoredProcedures\sp_GetAllByUserSkillId_Tasks.sql" />
+    <Build Include="Tables\TargetSkillAssessments.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\SkillfullAppData.publish.xml" />

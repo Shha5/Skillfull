@@ -9,5 +9,8 @@ namespace SkillfullWebUI.Models.UserSkillsModels
 
         [Required]
         public string NewSkillAssessmentId { get; set; }
+
+        [Required]
+        public string NewTargetSkillAssessmentId { get; set; }
     }
 }

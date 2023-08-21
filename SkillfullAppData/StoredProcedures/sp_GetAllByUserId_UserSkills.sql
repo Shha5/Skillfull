@@ -4,7 +4,7 @@ AS
 BEGIN
 SET NOCOUNT ON
 
-	SELECT [UserSkills].[Id], [UserSkills].[SkillId], [UserSkills].[SkillAssessmentId], [UserSkills].[SkillName]
+	SELECT [UserSkills].[Id], [UserSkills].[SkillId], [UserSkills].[SkillAssessmentId],[UserSkills].[TargetSkillAssessmentId], [UserSkills].[SkillName]
 
 	FROM [UserSkills]
 

@@ -5,5 +5,6 @@
         public string UserSkillId { get; set; }
         public string SkillName { get; set; }
         public int SkillAssessmentId { get; set; }
+        public int? TargetSkillAssessmentId { get ; set; }   
     }
 }

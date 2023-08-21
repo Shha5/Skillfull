@@ -12,7 +12,8 @@
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title">@skill.SkillName</h4>
-                <p>Your assessment: @skill.SkillAssessmentId</p>
+                <div><p>Your assessment: @skill.SkillAssessmentId</p></div>
+                <div><p>Your target: @skill.TargetSkillAssessmentId</p></div>
                 <span><img class="tooltip-icon" src="~/assets/information.png" data-bs-toggle="tooltip" data-bs-placement="right" title="1 - can't do shit; 2 - know a little; 3 - can do but with help; 4 - can do alone; 5 - can teach others'" /></span>
 
                 <a class="btn btn-primary" href="@Url.Action("UpdateUserSkill", "UserSkills", new {userSkillId = skill.UserSkillId, skillName = skill.SkillName})">Update</a>
@@ -39,6 +40,7 @@
     const ctx = document.getElementById('radarChart');
     let SkillNames = [];
     let SkillAssessments = [];
+    let TargetSkillAssessments = [];
 
     @if (Model != null && Model.Count > 0)
     {
@@ -46,8 +48,10 @@
         {
             @:SkillNames.push("@skill.SkillName");
             @:SkillAssessments.push(@skill.SkillAssessmentId);
+            @:TargetSkillAssessments.push(@skill.TargetSkillAssessmentId);
         }
     }
+
         const data = {
             labels: SkillNames,
             datasets: [{
@@ -60,6 +64,17 @@
                 pointBorderColor: '#fff',
                 pointHoverBackgroundColor: '#fff',
                 pointHoverBorderColor: 'rgb(255, 99, 132)'
+            },
+                {
+                label: "Target Skill Assessments",
+                data: TargetSkillAssessments,
+                fill: false,
+                backgroundColor: 'rgba(0, 204, 161, 0.2)',
+                borderColor: 'rgb(0, 204, 161)',
+                pointBackgroundColor: 'rgb(0, 204, 161)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(0, 204, 161)'
             }]
         }
         const config = {
@@ -73,17 +88,18 @@
             },
             scales: {
                 r: {
-                    beginAtZero: false,
-                    min: 1,
+                    beginAtZero: true,
+                    min: 0,
                     max: 5,
-                    suggestedMin: 1,
+                    suggestedMin: 0,
                     suggestedMax: 5,
                     stepSize: 1,
                     ticks: {
                         stepSize: 1
                     }
                 }
-            }
+            },
+            spanGaps: true,
         },
     };
 

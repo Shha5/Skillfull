@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddHttpClient<IApiService, ApiService>(client =>
     client.BaseAddress = new Uri("https://localhost:7071"));
-builder.Services.AddScoped<ICookieManagerService, CookieManagerService>();
+builder.Services.AddSingleton<ICookieManagerService, CookieManagerService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {

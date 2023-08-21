@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices;
 
 namespace SkillfullWebUI.Models.UserSkillsModels
 {
@@ -10,7 +11,8 @@ namespace SkillfullWebUI.Models.UserSkillsModels
         [Required]
         public string SkillName { get; set; }
 
-        [Required]
-        public string SkillAssessmentId { get; set; }
+        public int? SkillAssessmentId { get; set; }
+
+        public int? TargetSkillAssessmentId { get; set; }
     }
 }
