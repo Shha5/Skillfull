@@ -15,9 +15,9 @@ namespace SkillfullAPI.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ISendGridEmailService _sendGridEmailService;
-        private readonly IJwtTokenGenerationService _jwtTokenGenerationService;
+        private readonly ITokenGenerationService _jwtTokenGenerationService;
         
-        public AuthController(UserManager<IdentityUser> userManager, ISendGridEmailService sendGridEmailService, IJwtTokenGenerationService jwtTokenGenerationService)
+        public AuthController(UserManager<IdentityUser> userManager, ISendGridEmailService sendGridEmailService, ITokenGenerationService jwtTokenGenerationService)
         {
             _userManager = userManager;
             _sendGridEmailService = sendGridEmailService;

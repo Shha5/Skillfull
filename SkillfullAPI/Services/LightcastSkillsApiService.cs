@@ -101,7 +101,7 @@ namespace SkillfullAPI.Services
             try
             {
                 await semaphore.WaitAsync();
-                if (_memoryCache.TryGetValue("LightcastToken", out LightcastAuthTokenModel value))
+                if (_memoryCache.TryGetValue(LightcastTokenCacheKey, out LightcastAuthTokenModel value))
                 {
                     token = value;
                     _logger.LogInformation($"Token found in cache.");
@@ -115,7 +115,7 @@ namespace SkillfullAPI.Services
                         .SetAbsoluteExpiration(TimeSpan.FromSeconds(3540))
                         .SetPriority(CacheItemPriority.Normal)
                         .SetSize(1024);
-                    _memoryCache.Set("LightcastToken", token, cacheEntryOptions);
+                    _memoryCache.Set(LightcastTokenCacheKey, token, cacheEntryOptions);
                 }
             }
             finally

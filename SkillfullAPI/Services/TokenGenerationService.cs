@@ -14,16 +14,16 @@ namespace SkillfullAPI.Services
     public class JwtTokenGenerationService : IJwtTokenGenerationService
     {
         private readonly IConfiguration _configuration;
-        private readonly ApplicationDbContext _context;
+        private readonly IDataAccessService _dataAccess;
         private readonly TokenValidationParameters _validationParameters;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger<JwtTokenGenerationService> _logger;
 
-        public JwtTokenGenerationService(IConfiguration configuration, ApplicationDbContext context, TokenValidationParameters validationParameters, 
+        public JwtTokenGenerationService(IConfiguration configuration, IDataAccessService dataAccess, TokenValidationParameters validationParameters, 
             UserManager<IdentityUser> userManager, ILogger<JwtTokenGenerationService> logger)
         {
             _configuration = configuration;
-            _context = context;
+            _dataAccess = dataAccess;
             _validationParameters = validationParameters;
             _userManager = userManager;
             _logger = logger;
@@ -58,8 +58,7 @@ namespace SkillfullAPI.Services
                 IsUsed = false,
                 UserId = user.Id,
             };
-            await _context.RefreshTokens.AddAsync(refreshToken);
-            await _context.SaveChangesAsync();
+            await _dataAccess.SaveRefreshToken(refreshToken);
             return new AuthResultModel()
             {
                 Result = true,
@@ -103,7 +102,7 @@ namespace SkillfullAPI.Services
                 var tokenInVerification = jwtTokenHandler.ValidateToken(tokenRequest.Token, _validationParameters, out var validatedToken);
                 var unixExpiryDate = long.Parse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
                 var expiryDateTime = UnixTimeStampToDateTime(unixExpiryDate);
-                var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == tokenRequest.RefreshToken);
+                var storedToken = await _dataAccess.GetRefreshTokenData(tokenRequest.RefreshToken);
                 var jti = tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
                 if (validatedToken is JwtSecurityToken jwtSecurityToken)
                 {
@@ -136,8 +135,7 @@ namespace SkillfullAPI.Services
                     };
                 }
                 storedToken.IsUsed = true;
-                 _context.RefreshTokens.Update(storedToken);
-                await _context.SaveChangesAsync();
+                _dataAccess.UpdateRefreshToken(storedToken);
                 var dbUser = await _userManager.FindByIdAsync(storedToken.UserId);
                 return await GenerateJwtToken(dbUser);
             }

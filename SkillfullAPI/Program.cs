@@ -54,7 +54,7 @@ builder.Services.AddHttpClient<ILightcastSkillsApiService, LightcastSkillsApiSer
 client.BaseAddress = new Uri("https://emsiservices.com/skills/versions/latest/"));
 
 builder.Services.AddTransient<ISendGridEmailService, SendGridEmailService>();
-builder.Services.AddScoped<IJwtTokenGenerationService, JwtTokenGenerationService>();
+builder.Services.AddScoped<ITokenGenerationService, TokenGenerationService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ISqlDataAccess, SqlDataAccess>();
 builder.Services.AddSingleton<IUserSkillsData, UserSkillsData>();
